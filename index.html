@@ -437,19 +437,10 @@ function draw() {
   ctx.fillStyle = 'rgba(255,255,255,0.9)';
   ctx.fillRect(W/2-3, H/2-6, 6, 12);
 
-  // Paddles
-  ctx.fillStyle = '#ffffff';
-  ctx.shadowColor = 'rgba(255,255,255,0.5)';
-  ctx.shadowBlur = 8;
-  roundRect(PLAYER_X, G.playerY, PW, PH, 4);
-  roundRect(CPU_X, G.cpuY, PW, PH, 4);
-  ctx.shadowBlur = 0;
-
-  // Skin labels on paddles
-  ctx.font = '14px Arial';
-  ctx.textAlign = 'center';
-  ctx.fillText(G.playerSkin, PLAYER_X + PW/2, G.playerY - 4);
-  ctx.fillText('🤖', CPU_X + PW/2, G.cpuY - 4);
+  // Player racket (left side)
+  drawRacket(PLAYER_X, G.playerY, PW, PH, '#3399ff', '#1a66cc', G.playerSkin);
+  // CPU racket (right side, mirrored)
+  drawRacket(CPU_X, G.cpuY, PW, PH, '#ff4444', '#cc1111', '🤖');
 
   // Ball
   ctx.fillStyle = '#c8ff00';
@@ -459,6 +450,52 @@ function draw() {
   ctx.arc(G.ball.x, G.ball.y, BR, 0, Math.PI*2);
   ctx.fill();
   ctx.shadowBlur = 0;
+}
+
+function drawRacket(x, y, w, h, frameColor, gripColor, skinEmoji) {
+  var cx = x + w/2;
+  var headH = h * 0.68;
+  var headW = w + 10;
+  var headY = y;
+  var gripH = h * 0.32;
+  var gripY = y + headH;
+  var gripW = 6;
+
+  // Grip / handle
+  ctx.fillStyle = gripColor;
+  ctx.shadowColor = gripColor;
+  ctx.shadowBlur = 4;
+  roundRect(cx - gripW/2, gripY, gripW, gripH, 3);
+  ctx.shadowBlur = 0;
+
+  // Racket frame (oval)
+  ctx.strokeStyle = frameColor;
+  ctx.lineWidth = 4;
+  ctx.shadowColor = frameColor;
+  ctx.shadowBlur = 10;
+  ctx.beginPath();
+  ctx.ellipse(cx, headY + headH/2, headW/2, headH/2, 0, 0, Math.PI*2);
+  ctx.stroke();
+  ctx.shadowBlur = 0;
+
+  // Strings (horizontal)
+  ctx.strokeStyle = 'rgba(255,255,255,0.35)';
+  ctx.lineWidth = 1;
+  var strCount = 5;
+  for(var i=1; i<strCount; i++){
+    var sy = headY + (headH / strCount) * i;
+    var hw = Math.sqrt(Math.max(0, Math.pow(headW/2,2) - Math.pow(sy-(headY+headH/2),2)));
+    ctx.beginPath(); ctx.moveTo(cx-hw, sy); ctx.lineTo(cx+hw, sy); ctx.stroke();
+  }
+  // Strings (vertical center)
+  ctx.beginPath(); ctx.moveTo(cx, headY+2); ctx.lineTo(cx, headY+headH-2); ctx.stroke();
+
+  // Skin emoji above racket
+  ctx.font = '14px Arial';
+  ctx.textAlign = 'center';
+  ctx.shadowBlur = 0;
+  ctx.fillStyle = '#fff';
+  ctx.fillText(skinEmoji, cx, headY - 4);
 }
 
 function roundRect(x,y,w,h,r){
