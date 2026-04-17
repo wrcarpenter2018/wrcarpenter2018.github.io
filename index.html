@@ -185,7 +185,10 @@ var G = {
   cpuY: 150,
   mouseY: 190,
   running: false,
-  matchOver: false
+  matchOver: false,
+  cpuMissDecided: false,
+  cpuMissing: false,
+  cpuMissTarget: null
 };
 
 var PW = 14, PH = 80, BR = 8;
@@ -292,11 +295,20 @@ function update() {
   targetY = Math.max(20, Math.min(H-PH-20, targetY));
   G.playerY += (targetY - G.playerY) * 0.25;
 
-  // CPU AI
+  // CPU AI — 75% player win rate: CPU misses 25% of shots
+  if(G.ball.dx > 0 && !G.cpuMissDecided) {
+    G.cpuMissDecided = true;
+    G.cpuMissing = Math.random() < 0.25;
+    G.cpuMissTarget = G.cpuMissing
+      ? (G.ball.y < H/2 ? H - PH - 20 : 20)
+      : null;
+  }
+  if(G.ball.dx < 0) { G.cpuMissDecided = false; G.cpuMissing = false; }
   var cpuCenter = G.cpuY + PH/2;
   var cpuSpeed = 3.8;
-  if(cpuCenter < G.ball.y - 8) G.cpuY += cpuSpeed;
-  else if(cpuCenter > G.ball.y + 8) G.cpuY -= cpuSpeed;
+  var cpuTarget = G.cpuMissing ? G.cpuMissTarget : G.ball.y;
+  if(cpuCenter < cpuTarget - 8) G.cpuY += cpuSpeed;
+  else if(cpuCenter > cpuTarget + 8) G.cpuY -= cpuSpeed;
   G.cpuY = Math.max(20, Math.min(H-PH-20, G.cpuY));
 
   // Move ball
