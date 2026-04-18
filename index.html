@@ -19,7 +19,7 @@ body{font-family:Arial Black,Arial,sans-serif;background:#0a0a1a;color:#fff;min-
 .lbl{font-size:11px;letter-spacing:3px;color:#4caf50;text-transform:uppercase;margin-bottom:10px;text-align:center}
 #nameInput{width:100%;padding:13px;font-size:17px;font-family:inherit;font-weight:bold;background:rgba(255,255,255,.08);border:2px solid rgba(76,175,80,.5);border-radius:10px;color:#fff;text-align:center;margin-bottom:18px;outline:none}
 #nameInput:focus{border-color:#4caf50}
-.skin-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-bottom:20px}
+.skin-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:20px}
 .skin-btn{background:rgba(255,255,255,.05);border:2px solid rgba(255,255,255,.12);border-radius:12px;padding:10px 6px;cursor:pointer;font-size:26px;text-align:center;transition:all .2s;display:flex;flex-direction:column;align-items:center;gap:3px}
 .skin-btn span{font-size:9px;color:#888;font-family:Arial,sans-serif;font-weight:bold;letter-spacing:1px;text-transform:uppercase}
 .skin-btn:hover{border-color:#4caf50;transform:translateY(-2px)}
@@ -163,11 +163,13 @@ body{font-family:Arial Black,Arial,sans-serif;background:#0a0a1a;color:#fff;min-
 <script>
 // ===== SKINS =====
 var SKINS = [
-  {e:'🇨🇭',n:'Federer',  frame:'#c8102e',grip:'#8b0000',accent:'#ffffff'},
-  {e:'🇪🇸',n:'Nadal',    frame:'#c60b1e',grip:'#f1bf00',accent:'#ffd700'},
-  {e:'🇷🇸',n:'Djokovic', frame:'#0033a0',grip:'#c6363c',accent:'#88aaff'},
-  {e:'🇨🇿',n:'Lendl',    frame:'#d7141a',grip:'#003087',accent:'#ffffff'},
-  {e:'🇬🇧',n:'Murray',   frame:'#012169',grip:'#c8102e',accent:'#88aaff'}
+  {e:'🇨🇭',n:'Federer',  abbr:'RF',frame:'#c8102e',grip:'#8b0000'},
+  {e:'🇪🇸',n:'Nadal',    abbr:'RN',frame:'#c60b1e',grip:'#f1bf00'},
+  {e:'🇷🇸',n:'Djokovic', abbr:'ND',frame:'#0033a0',grip:'#c6363c'},
+  {e:'🇨🇿',n:'Lendl',    abbr:'IL',frame:'#d7141a',grip:'#003087'},
+  {e:'🇬🇧',n:'Murray',   abbr:'AM',frame:'#012169',grip:'#c8102e'},
+  {e:'🇺🇸',n:'Agassi',   abbr:'AA',frame:'#ff6200',grip:'#cc0066'},
+  {e:'🇪🇸',n:'Alcaraz',  abbr:'CA',frame:'#00b4d8',grip:'#7209b7'}
 ];
 
 // ===== CANVAS =====
@@ -592,10 +594,10 @@ function drawPlayer(x, y, w, h, skin, facingRight) {
 
   // Player initial on body
   ctx.fillStyle = '#fff';
-  ctx.font = 'bold 12px Arial Black, Arial';
+  ctx.font = 'bold 9px Arial Black, Arial';
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
-  ctx.fillText(skin.n.charAt(0), bx, cy);
+  ctx.fillText(skin.abbr, bx, cy);
   ctx.textBaseline = 'alphabetic';
 }
 
