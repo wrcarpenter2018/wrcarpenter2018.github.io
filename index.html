@@ -526,9 +526,9 @@ function startMysteryBattle() {
   var skin = getSelectedSkin();
   G.playerName = name;
   G.playerSkin = skin;
-  // Pick a random CPU (any skin except player's)
+  // Only free skins (unlock:0) eligible for mystery — not the Big 3 or Murray
   var pool = [];
-  for(var i=0;i<SKINS.length;i++){ if(SKINS[i].n !== skin.n) pool.push(i); }
+  for(var i=0;i<SKINS.length;i++){ if(SKINS[i].unlock === 0 && SKINS[i].n !== skin.n) pool.push(i); }
   var idx = pool[Math.floor(Math.random() * pool.length)];
   G.cpuSkin = SKINS[idx];
   G.mysteryBattle = true;
