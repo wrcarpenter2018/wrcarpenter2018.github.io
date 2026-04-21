@@ -30,8 +30,8 @@ body{font-family:Arial Black,Arial,sans-serif;background:#0a0a1a;color:#fff;min-
 #startBtn:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(76,175,80,.4)}
 .rules{margin-top:8px;background:rgba(0,0,0,.3);border-radius:8px;padding:7px;font-size:10px;color:#888;line-height:1.8;text-align:center}
 .rules b{color:#4caf50}
-.qr-area{margin-top:16px;text-align:center}
-.qr-lbl{font-size:10px;letter-spacing:2px;color:#555;text-transform:uppercase;margin-bottom:8px}
+.qr-area{margin-top:8px;text-align:center}
+.qr-lbl{font-size:9px;letter-spacing:2px;color:#555;text-transform:uppercase;margin-bottom:4px}
 #qrcode canvas,#qrcode img{border:3px solid #4caf50;border-radius:6px}
 .qr-url{font-size:10px;color:#444;margin-top:6px}
 
@@ -1020,7 +1020,7 @@ window.addEventListener('DOMContentLoaded', function(){
   try {
     new QRCode(document.getElementById('qrcode'),{
       text:'https://wrcarpenter2018.github.io/coins',
-      width:120, height:120,
+      width:80, height:80,
       colorDark:'#4caf50', colorLight:'#0a0a1a',
       correctLevel:QRCode.CorrectLevel.M
     });
