@@ -11,24 +11,24 @@ body{font-family:Arial Black,Arial,sans-serif;background:#0a0a1a;color:#fff;min-
 .hidden{display:none!important}
 
 /* WELCOME */
-#welcome{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px;background:radial-gradient(ellipse at top,#0a2a0a,#0a0a1a)}
-.logo-em{font-size:72px;text-align:center}
-.logo-title{font-size:44px;font-weight:900;background:linear-gradient(180deg,#FFD700,#FF8C00);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;text-align:center}
-.logo-sub{font-size:12px;letter-spacing:5px;color:#4caf50;text-transform:uppercase;text-align:center;margin-bottom:24px}
-.box{background:rgba(76,175,80,.08);border:2px solid rgba(76,175,80,.3);border-radius:20px;padding:26px;max-width:460px;width:100%}
-.lbl{font-size:11px;letter-spacing:3px;color:#4caf50;text-transform:uppercase;margin-bottom:10px;text-align:center}
-#nameInput{width:100%;padding:13px;font-size:17px;font-family:inherit;font-weight:bold;background:rgba(255,255,255,.08);border:2px solid rgba(76,175,80,.5);border-radius:10px;color:#fff;text-align:center;margin-bottom:18px;outline:none}
+#welcome{height:100vh;overflow-y:auto;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:12px 16px;background:radial-gradient(ellipse at top,#0a2a0a,#0a0a1a);box-sizing:border-box}
+.logo-em{font-size:42px;text-align:center;line-height:1}
+.logo-title{font-size:30px;font-weight:900;background:linear-gradient(180deg,#FFD700,#FF8C00);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;text-align:center;margin:2px 0}
+.logo-sub{font-size:10px;letter-spacing:4px;color:#4caf50;text-transform:uppercase;text-align:center;margin-bottom:10px}
+.box{background:rgba(76,175,80,.08);border:2px solid rgba(76,175,80,.3);border-radius:16px;padding:14px;max-width:460px;width:100%}
+.lbl{font-size:10px;letter-spacing:3px;color:#4caf50;text-transform:uppercase;margin-bottom:6px;text-align:center}
+#nameInput{width:100%;padding:9px;font-size:15px;font-family:inherit;font-weight:bold;background:rgba(255,255,255,.08);border:2px solid rgba(76,175,80,.5);border-radius:10px;color:#fff;text-align:center;margin-bottom:10px;outline:none;box-sizing:border-box}
 #nameInput:focus{border-color:#4caf50}
-.skin-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:20px}
-.skin-btn{background:rgba(255,255,255,.05);border:2px solid rgba(255,255,255,.12);border-radius:12px;padding:10px 6px;cursor:pointer;font-size:26px;text-align:center;transition:all .2s;display:flex;flex-direction:column;align-items:center;gap:3px}
-.skin-btn span{font-size:9px;color:#888;font-family:Arial,sans-serif;font-weight:bold;letter-spacing:1px;text-transform:uppercase}
+.skin-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:10px}
+.skin-btn{background:rgba(255,255,255,.05);border:2px solid rgba(255,255,255,.12);border-radius:10px;padding:7px 4px;cursor:pointer;font-size:22px;text-align:center;transition:all .2s;display:flex;flex-direction:column;align-items:center;gap:2px}
+.skin-btn span{font-size:8px;color:#888;font-family:Arial,sans-serif;font-weight:bold;letter-spacing:1px;text-transform:uppercase}
 .skin-btn:hover{border-color:#4caf50;transform:translateY(-2px)}
 .skin-btn.sel{border-color:#4caf50;background:rgba(76,175,80,.15);box-shadow:0 0 12px rgba(76,175,80,.3)}
 .skin-btn.locked{opacity:.45;cursor:not-allowed;background:rgba(0,0,0,.2);border-color:rgba(255,255,255,.06)}
-.welcome-coins{text-align:center;margin-bottom:14px;font-size:13px;color:#FFD700;font-weight:900;letter-spacing:1px}
-#startBtn{width:100%;padding:15px;font-size:18px;font-family:inherit;font-weight:900;text-transform:uppercase;letter-spacing:3px;background:linear-gradient(135deg,#4caf50,#2e7d32);border:none;border-radius:10px;color:#fff;cursor:pointer;transition:all .2s}
+.welcome-coins{text-align:center;margin-bottom:8px;font-size:12px;color:#FFD700;font-weight:900;letter-spacing:1px}
+#startBtn{width:100%;padding:11px;font-size:16px;font-family:inherit;font-weight:900;text-transform:uppercase;letter-spacing:3px;background:linear-gradient(135deg,#4caf50,#2e7d32);border:none;border-radius:10px;color:#fff;cursor:pointer;transition:all .2s}
 #startBtn:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(76,175,80,.4)}
-.rules{margin-top:12px;background:rgba(0,0,0,.3);border-radius:8px;padding:10px;font-size:11px;color:#888;line-height:1.9;text-align:center}
+.rules{margin-top:8px;background:rgba(0,0,0,.3);border-radius:8px;padding:7px;font-size:10px;color:#888;line-height:1.8;text-align:center}
 .rules b{color:#4caf50}
 .qr-area{margin-top:16px;text-align:center}
 .qr-lbl{font-size:10px;letter-spacing:2px;color:#555;text-transform:uppercase;margin-bottom:8px}
@@ -152,7 +152,7 @@ body{font-family:Arial Black,Arial,sans-serif;background:#0a0a1a;color:#fff;min-
     <div class="lbl">Choose Your Skin</div>
     <div class="skin-grid" id="skinGrid"></div>
     <button id="startBtn" onclick="startGame()">🎾 PLAY TENNIS</button>
-    <button id="vaultBtn" onclick="openVault()" style="width:100%;margin-top:10px;padding:12px;font-size:14px;font-family:inherit;font-weight:900;text-transform:uppercase;letter-spacing:2px;background:linear-gradient(135deg,#7b2ff7,#4a00b4);border:none;border-radius:10px;color:#fff;cursor:pointer">🏦 MY VAULT</button>
+    <button id="vaultBtn" onclick="openVault()" style="width:100%;margin-top:6px;padding:9px;font-size:13px;font-family:inherit;font-weight:900;text-transform:uppercase;letter-spacing:2px;background:linear-gradient(135deg,#7b2ff7,#4a00b4);border:none;border-radius:10px;color:#fff;cursor:pointer">🏦 MY VAULT</button>
     <div class="rules">
       <b>HOW TO PLAY</b><br>
       Move your mouse (or touch) to control your paddle<br>
