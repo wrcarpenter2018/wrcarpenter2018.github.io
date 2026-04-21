@@ -254,6 +254,7 @@ body{font-family:Arial Black,Arial,sans-serif;background:#0a0a1a;color:#fff;min-
     <div class="upg-coins" id="upgCoinDisplay">🪙 100</div>
   </div>
   <div class="upg-grid" id="upgGrid"></div>
+  <div id="upgToast" style="display:none;position:fixed;bottom:30px;left:50%;transform:translateX(-50%);padding:12px 24px;border-radius:12px;color:#fff;font-weight:900;font-size:15px;text-align:center;transition:opacity .4s;z-index:999"></div>
   <button class="end-btn vault" onclick="openVault()">← BACK TO VAULT</button>
 </div>
 
@@ -299,7 +300,12 @@ function saveUpgrades() {
 function loadUpgrades() {
   try {
     var v = JSON.parse(localStorage.getItem('lfo_upgrades'));
-    if(v) UPGRADES = v;
+    if(v && typeof v === 'object') {
+      var keys = ['speed','power','reach','spin'];
+      for(var i=0;i<keys.length;i++){
+        UPGRADES[keys[i]] = (v[keys[i]] && v[keys[i]] >= 1) ? 1 : 0;
+      }
+    }
   } catch(e){}
 }
 
@@ -322,22 +328,53 @@ function renderUpgrades() {
   document.getElementById('upgCoinDisplay').textContent = '🪙 ' + G.coins;
   var grid = document.getElementById('upgGrid');
   grid.innerHTML = '';
-  UPGRADE_DEFS.forEach(function(def) {
-    var owned = UPGRADES[def.key] === 1;
-    var canAfford = G.coins >= def.cost;
-    var card = document.createElement('div');
-    card.className = 'upg-card' + (owned ? ' maxed' : '');
-    card.innerHTML = '<div class="upg-icon">'+def.icon+'</div>'
-      +'<div class="upg-name">'+def.name+'</div>'
-      +'<div class="upg-desc">'+def.desc+'</div>'
-      +'<div class="upg-cost">'+(owned ? '✅ UNLOCKED' : def.cost+' 🪙')+'</div>'
-      +'<button class="upg-btn'+(owned?' maxed-btn':'')+'"'
-        +(owned ? ' disabled' : canAfford ? '' : ' disabled')
-        +' onclick="buyUpgrade(\''+def.key+'\')">'
-        +(owned ? 'ACTIVE' : canAfford ? 'UNLOCK' : 'NEED '+def.cost+' 🪙')
-      +'</button>';
-    grid.appendChild(card);
-  });
+  for(var i = 0; i < UPGRADE_DEFS.length; i++) {
+    (function(def) {
+      var owned = UPGRADES[def.key] ? true : false;
+      var canAfford = G.coins >= def.cost;
+      var card = document.createElement('div');
+      card.className = 'upg-card' + (owned ? ' maxed' : '');
+
+      var icon = document.createElement('div');
+      icon.className = 'upg-icon';
+      icon.textContent = def.icon;
+
+      var name = document.createElement('div');
+      name.className = 'upg-name';
+      name.textContent = def.name;
+
+      var desc = document.createElement('div');
+      desc.className = 'upg-desc';
+      desc.textContent = def.desc;
+
+      var cost = document.createElement('div');
+      cost.className = 'upg-cost';
+      cost.textContent = owned ? '✅ UNLOCKED' : def.cost + ' 🪙';
+
+      var btn = document.createElement('button');
+      btn.className = 'upg-btn' + (owned ? ' maxed-btn' : '');
+      btn.textContent = owned ? 'ACTIVE' : canAfford ? 'UNLOCK' : 'NEED ' + def.cost + ' 🪙';
+      btn.disabled = owned || !canAfford;
+      btn.addEventListener('click', function() { buyUpgrade(def.key); });
+
+      card.appendChild(icon);
+      card.appendChild(name);
+      card.appendChild(desc);
+      card.appendChild(cost);
+      card.appendChild(btn);
+      grid.appendChild(card);
+    })(UPGRADE_DEFS[i]);
+  }
+}
+
+function showUpgToast(msg, good) {
+  var t = document.getElementById('upgToast');
+  t.textContent = msg;
+  t.style.background = good ? 'rgba(0,200,80,.92)' : 'rgba(200,40,40,.92)';
+  t.style.opacity = '1';
+  t.style.display = 'block';
+  clearTimeout(t._tid);
+  t._tid = setTimeout(function(){ t.style.opacity='0'; setTimeout(function(){t.style.display='none';},400); }, 2000);
 }
 
 function buyUpgrade(key) {
@@ -345,13 +382,15 @@ function buyUpgrade(key) {
   for(var i = 0; i < UPGRADE_DEFS.length; i++) {
     if(UPGRADE_DEFS[i].key === key) { def = UPGRADE_DEFS[i]; break; }
   }
-  if(!def || UPGRADES[key]) return;
-  if(G.coins < def.cost) return;
+  if(!def) return;
+  if(UPGRADES[key]) { showUpgToast('Already unlocked!', false); return; }
+  if(G.coins < def.cost) { showUpgToast('Need ' + def.cost + ' coins! You have ' + G.coins + '.', false); return; }
   G.coins = G.coins - def.cost;
   UPGRADES[key] = 1;
   saveCoins();
   saveUpgrades();
   renderUpgrades();
+  showUpgToast(def.icon + ' ' + def.name + ' UNLOCKED! -' + def.cost + ' coins', true);
 }
 
 // ===== CANVAS =====
