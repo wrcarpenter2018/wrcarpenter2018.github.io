@@ -285,8 +285,12 @@ var SKINS = [
   {e:'🇨🇿',n:'Lendl',    abbr:'IL',frame:'#d7141a',grip:'#003087', unlock:0},
   {e:'🇪🇸',n:'Alcaraz',  abbr:'CA',frame:'#00b4d8',grip:'#7209b7', unlock:0},
   {e:'🇮🇹',n:'Sinner',   abbr:'JS',frame:'#cc0000',grip:'#006400', unlock:0},
+  {e:'🇺🇸',n:'Riggs',    abbr:'BR',frame:'#8b0000',grip:'#f5c400', unlock:0},
+  {e:'🇩🇰',n:'Rune',     abbr:'HR',frame:'#c60c30',grip:'#ffffff', unlock:0},
+  {e:'🇨🇿',n:'Lehecka',  abbr:'JL',frame:'#11457e',grip:'#d7141a', unlock:0},
   {e:'🇬🇧',n:'Murray',   abbr:'AM',frame:'#012169',grip:'#c8102e', unlock:300},
   {e:'🇨🇭',n:'Federer',  abbr:'RF',frame:'#c8102e',grip:'#8b0000', unlock:400},
+  {e:'🇩🇪',n:'Zverev',   abbr:'AZ',frame:'#222222',grip:'#dd0000', unlock:500},
   {e:'🇪🇸',n:'Nadal',    abbr:'RN',frame:'#c60b1e',grip:'#f1bf00', unlock:600},
   {e:'🇷🇸',n:'Djokovic', abbr:'ND',frame:'#0033a0',grip:'#c6363c', unlock:700},
   {e:'🇺🇸',n:'McEnroe',  abbr:'JM',frame:'#b22222',grip:'#ffffff', unlock:0, mystery:true},
@@ -486,8 +490,14 @@ function initCanvas() {
 function buildSkinGrid() {
   var g = document.getElementById('skinGrid');
   g.innerHTML = '';
+  // Build index list, shuffle unlocked skins among themselves, locked/mystery stay filtered
+  var indices = [];
+  for(var k=0;k<SKINS.length;k++) indices.push(k);
+  // Fisher-Yates shuffle
+  for(var k=indices.length-1;k>0;k--){var j=Math.floor(Math.random()*(k+1));var tmp=indices[k];indices[k]=indices[j];indices[j]=tmp;}
   var firstUnlockedSet = false;
-  SKINS.forEach(function(s,i){
+  indices.forEach(function(i){
+    var s = SKINS[i];
     if(s.mystery && !WON_SKINS[i]) return; // hide mystery skins until won
     var locked = !isSkinUnlocked(i);
     var b = document.createElement('button');
