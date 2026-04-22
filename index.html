@@ -30,10 +30,10 @@ body{font-family:Arial Black,Arial,sans-serif;background:#0a0a1a;color:#fff;min-
 #startBtn:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(76,175,80,.4)}
 .rules{margin-top:8px;background:rgba(0,0,0,.3);border-radius:8px;padding:7px;font-size:10px;color:#888;line-height:1.8;text-align:center}
 .rules b{color:#4caf50}
-.qr-area{margin-top:8px;text-align:center}
-.qr-lbl{font-size:9px;letter-spacing:2px;color:#555;text-transform:uppercase;margin-bottom:4px}
-#qrcode canvas,#qrcode img{border:3px solid #4caf50;border-radius:6px}
-.qr-url{font-size:10px;color:#444;margin-top:6px}
+.qr-area{margin-top:6px;display:flex;align-items:center;justify-content:center;gap:8px}
+.qr-lbl{font-size:8px;letter-spacing:1px;color:#444;text-transform:uppercase}
+#qrcode canvas,#qrcode img{border:2px solid #4caf50;border-radius:4px;display:block}
+.qr-url{font-size:8px;color:#444}
 
 /* GAME */
 #game{min-height:100vh;display:flex;flex-direction:column;align-items:center;background:#1a0b30;padding:12px}
@@ -161,9 +161,8 @@ body{font-family:Arial Black,Arial,sans-serif;background:#0a0a1a;color:#fff;min-
       Win = <b>+50 coins</b> &nbsp;|&nbsp; Lose = <b>-50 coins</b> &nbsp;|&nbsp; Start with <b>100 coins</b>
     </div>
     <div class="qr-area">
-      <div class="qr-lbl">Scan to play on phone</div>
       <div id="qrcode"></div>
-      <div class="qr-url">wrcarpenter2018.github.io/coins</div>
+      <div><div class="qr-lbl">Scan to play</div><div class="qr-url">wrcarpenter2018.github.io/coins</div></div>
     </div>
   </div>
 </div>
@@ -1097,7 +1096,7 @@ window.addEventListener('DOMContentLoaded', function(){
   try {
     new QRCode(document.getElementById('qrcode'),{
       text:'https://wrcarpenter2018.github.io/coins',
-      width:80, height:80,
+      width:60, height:60,
       colorDark:'#4caf50', colorLight:'#0a0a1a',
       correctLevel:QRCode.CorrectLevel.M
     });
