@@ -4,7 +4,6 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Legends Face Off</title>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 body{font-family:Arial Black,Arial,sans-serif;background:#0a0a1a;color:#fff;min-height:100vh}
@@ -140,7 +139,7 @@ body{font-family:Arial Black,Arial,sans-serif;background:#0a0a1a;color:#fff;min-
 <body>
 
 <!-- QR BADGE (fixed corner) -->
-<div id="qrBadge"><div id="qrcode"></div><span>SCAN TO PLAY</span></div>
+<div id="qrBadge"><img src="https://quickchart.io/qr?text=https://wrcarpenter2018.github.io/coins&size=56&dark=4caf50&light=000000" width="56" height="56" style="border-radius:3px;display:block"><span>SCAN TO PLAY</span></div>
 
 <!-- WELCOME -->
 <div id="welcome">
@@ -1085,15 +1084,7 @@ window.addEventListener('DOMContentLoaded', function(){
   document.getElementById('nameInput').addEventListener('keydown', function(e){
     if(e.key==='Enter') startGame();
   });
-  try {
-    new QRCode(document.getElementById('qrcode'),{
-      text:'https://wrcarpenter2018.github.io/coins',
-      width:56, height:56,
-      colorDark:'#4caf50', colorLight:'#000000',
-      correctLevel:QRCode.CorrectLevel.M
-    });
-    document.getElementById('qrBadge').style.display = 'block';
-  } catch(e){}
+  document.getElementById('qrBadge').style.display = 'block';
 });
 </script>
 </body>
