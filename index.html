@@ -165,6 +165,13 @@ body{font-family:Arial Black,Arial,sans-serif;background:#0a0a1a;color:#fff;min-
     <div class="welcome-coins" id="welcomeCoins">🪙 100 coins</div>
     <div class="lbl">Your Name</div>
     <input type="text" id="nameInput" placeholder="Enter your name..." maxlength="16" />
+    <div class="lbl">Choose Your Tournament</div>
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:5px;margin-bottom:7px" id="slamPicker">
+      <button class="slam-pick sel-slam" data-slam="wb"  onclick="selectSlam('wb')"  style="background:linear-gradient(135deg,#1b5e20,#33691e);border:2px solid #4caf50;border-radius:8px;padding:5px 2px;cursor:pointer;font-size:10px;color:#fff;font-weight:900;font-family:inherit">🌿<br>Wimbledon</button>
+      <button class="slam-pick" data-slam="ao"  onclick="selectSlam('ao')"  style="background:rgba(255,255,255,.05);border:2px solid rgba(255,255,255,.15);border-radius:8px;padding:5px 2px;cursor:pointer;font-size:10px;color:#fff;font-weight:900;font-family:inherit">🔵<br>Aus Open</button>
+      <button class="slam-pick" data-slam="rg"  onclick="selectSlam('rg')"  style="background:rgba(255,255,255,.05);border:2px solid rgba(255,255,255,.15);border-radius:8px;padding:5px 2px;cursor:pointer;font-size:10px;color:#fff;font-weight:900;font-family:inherit">🧱<br>Roland Garros</button>
+      <button class="slam-pick" data-slam="uso" onclick="selectSlam('uso')" style="background:rgba(255,255,255,.05);border:2px solid rgba(255,255,255,.15);border-radius:8px;padding:5px 2px;cursor:pointer;font-size:10px;color:#fff;font-weight:900;font-family:inherit">🌙<br>US Open</button>
+    </div>
     <div class="lbl">Choose Your Skin</div>
     <div class="skin-grid" id="skinGrid"></div>
     <button id="startBtn" onclick="startGame()">🎾 PLAY TENNIS</button>
@@ -497,7 +504,8 @@ var G = {
   cpuMissing: false,
   cpuMissTarget: null,
   mysteryBattle: false,
-  mysterySkinIdx: -1
+  mysterySkinIdx: -1,
+  selectedSlam: 'wb'
 };
 
 var PW = 14, PH = 80, BR = 8;
@@ -577,6 +585,27 @@ function getSelectedSkin() {
     if(document.getElementById('sk_'+i).classList.contains('sel')) return SKINS[i];
   }
   return SKINS[0];
+}
+
+var SLAM_THEMES = {
+  wb:  {surround:'#2d1b5e', stripe1:'#2d7a2d', stripe2:'#348534', label:'WIMBLEDON',  lineColor:'rgba(255,255,255,0.85)'},
+  ao:  {surround:'#0a1a3a', stripe1:'#1565c0', stripe2:'#1976d2', label:'AUSTRALIAN OPEN', lineColor:'rgba(255,255,255,0.9)'},
+  rg:  {surround:'#3a1a0a', stripe1:'#c2440f', stripe2:'#d4521a', label:'ROLAND GARROS', lineColor:'rgba(255,255,230,0.9)'},
+  uso: {surround:'#0a0a2a', stripe1:'#1a237e', stripe2:'#283593', label:'US OPEN',     lineColor:'rgba(255,255,255,0.9)'}
+};
+
+function selectSlam(key) {
+  G.selectedSlam = key;
+  document.querySelectorAll('.slam-pick').forEach(function(b){
+    var theme = SLAM_THEMES[b.dataset.slam];
+    if(b.dataset.slam === key) {
+      b.style.background = 'linear-gradient(135deg,' + theme.stripe1 + ',' + theme.stripe2 + ')';
+      b.style.borderColor = '#FFD700';
+    } else {
+      b.style.background = 'rgba(255,255,255,.05)';
+      b.style.borderColor = 'rgba(255,255,255,.15)';
+    }
+  });
 }
 
 function goToMenu() {
@@ -819,8 +848,10 @@ function endMatch(playerWon) {
 
 // ===== DRAW =====
 function draw() {
-  // Wimbledon purple surround
-  ctx.fillStyle = '#2d1b5e';
+  var theme = SLAM_THEMES[G.selectedSlam] || SLAM_THEMES.wb;
+
+  // Surround/stands
+  ctx.fillStyle = theme.surround;
   ctx.fillRect(0, 0, W, H);
 
   // Crowd
@@ -831,34 +862,34 @@ function draw() {
     ctx.fill();
   });
 
-  // Wimbledon text in crowd area
+  // Tournament label
   ctx.fillStyle = 'rgba(255,255,255,0.18)';
   ctx.font = 'bold 9px Arial';
   ctx.textAlign = 'center';
-  ctx.fillText('WIMBLEDON', W/2, 11);
-  ctx.fillText('WIMBLEDON', W/2, H - 4);
+  ctx.fillText(theme.label, W/2, 11);
+  ctx.fillText(theme.label, W/2, H - 4);
 
-  // Grass stripes inside court
+  // Court surface stripes
   ctx.save();
   ctx.beginPath();
   ctx.rect(21, 21, W-42, H-42);
   ctx.clip();
   var stripeW = 36;
   for(var sx = 21; sx < W-21; sx += stripeW){
-    var idx = Math.floor((sx-21)/stripeW);
-    ctx.fillStyle = idx % 2 === 0 ? '#2d7a2d' : '#348534';
+    var si = Math.floor((sx-21)/stripeW);
+    ctx.fillStyle = si % 2 === 0 ? theme.stripe1 : theme.stripe2;
     ctx.fillRect(sx, 21, Math.min(stripeW, W-21-sx), H-42);
   }
   ctx.restore();
 
   // Court boundary
-  ctx.strokeStyle = 'rgba(255,255,255,0.85)';
+  ctx.strokeStyle = theme.lineColor;
   ctx.lineWidth = 2;
   ctx.strokeRect(20, 20, W-40, H-40);
 
   // Service boxes
   ctx.lineWidth = 1;
-  ctx.strokeStyle = 'rgba(255,255,255,0.5)';
+  ctx.strokeStyle = theme.lineColor.replace('0.85','0.5').replace('0.9','0.5');
   ctx.beginPath(); ctx.moveTo(W*0.3,20); ctx.lineTo(W*0.3,H-20); ctx.stroke();
   ctx.beginPath(); ctx.moveTo(W*0.7,20); ctx.lineTo(W*0.7,H-20); ctx.stroke();
   ctx.beginPath(); ctx.moveTo(W*0.3,H/2); ctx.lineTo(W*0.7,H/2); ctx.stroke();
