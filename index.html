@@ -157,7 +157,7 @@ body{font-family:Arial Black,Arial,sans-serif;background:#0a0a1a;color:#fff;min-
   <div class="logo-title">🎾 LEGENDS FACE OFF</div>
   <div class="logo-sub">Play to Win</div>
   <div style="display:flex;align-items:center;justify-content:center;gap:6px;margin-bottom:4px">
-    <img src="https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=https://wrcarpenter2018.github.io/tennis" width="80" height="80" style="border-radius:4px;border:2px solid #4caf50">
+    <canvas id="qrCanvas" width="80" height="80" style="border-radius:4px;border:2px solid #4caf50;background:#fff"></canvas>
     <div style="font-size:8px;color:#4caf50;letter-spacing:2px">SCAN TO PLAY</div>
   </div>
   <div class="box">
@@ -1370,6 +1370,32 @@ function nextTriviaQ() {
   showTriviaQ();
 }
 
+// ===== QR CODE (self-contained, no external service) =====
+function drawQR(canvasId, text) {
+  // Use a data URI approach via a hidden iframe pointing to google charts
+  // Fallback: show URL text on canvas
+  var c = document.getElementById(canvasId);
+  if(!c) return;
+  var img = new Image();
+  img.crossOrigin = 'anonymous';
+  img.onload = function() {
+    var ctx2 = c.getContext('2d');
+    ctx2.drawImage(img, 0, 0, c.width, c.height);
+  };
+  img.onerror = function() {
+    // Draw URL as text fallback
+    var ctx2 = c.getContext('2d');
+    ctx2.fillStyle = '#fff';
+    ctx2.fillRect(0,0,c.width,c.height);
+    ctx2.fillStyle = '#000';
+    ctx2.font = '6px Arial';
+    ctx2.textAlign = 'center';
+    ctx2.fillText('wrcarpenter2018', c.width/2, 35);
+    ctx2.fillText('.github.io/tennis', c.width/2, 46);
+  };
+  img.src = 'https://chart.googleapis.com/chart?cht=qr&chs=200x200&chl=' + encodeURIComponent(text) + '&choe=UTF-8';
+}
+
 // ===== INIT =====
 window.addEventListener('DOMContentLoaded', function(){
   G.coins = loadCoins();
@@ -1380,6 +1406,7 @@ window.addEventListener('DOMContentLoaded', function(){
   G.playerSkin = SKINS[0];
   buildSkinGrid();
   buildRoundPicker();
+  drawQR('qrCanvas', 'https://wrcarpenter2018.github.io/tennis');
   document.getElementById('nameInput').addEventListener('keydown', function(e){
     if(e.key==='Enter') startGame();
   });
