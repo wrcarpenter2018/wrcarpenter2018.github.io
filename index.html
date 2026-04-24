@@ -172,6 +172,8 @@ body{font-family:Arial Black,Arial,sans-serif;background:#0a0a1a;color:#fff;min-
       <button class="slam-pick" data-slam="rg"  onclick="selectSlam('rg')"  style="background:rgba(255,255,255,.05);border:2px solid rgba(255,255,255,.15);border-radius:8px;padding:5px 2px;cursor:pointer;font-size:10px;color:#fff;font-weight:900;font-family:inherit">🧱<br>Roland Garros</button>
       <button class="slam-pick" data-slam="uso" onclick="selectSlam('uso')" style="background:rgba(255,255,255,.05);border:2px solid rgba(255,255,255,.15);border-radius:8px;padding:5px 2px;cursor:pointer;font-size:10px;color:#fff;font-weight:900;font-family:inherit">🌙<br>US Open</button>
     </div>
+    <div class="lbl">Choose Your Round</div>
+    <div style="display:flex;gap:4px;margin-bottom:7px;overflow-x:auto;padding-bottom:2px" id="roundPicker"></div>
     <div class="lbl">Choose Your Skin</div>
     <div class="skin-grid" id="skinGrid"></div>
     <button id="startBtn" onclick="startGame()">🎾 PLAY TENNIS</button>
@@ -505,7 +507,8 @@ var G = {
   cpuMissTarget: null,
   mysteryBattle: false,
   mysterySkinIdx: -1,
-  selectedSlam: 'wb'
+  selectedSlam: 'wb',
+  selectedRound: 'r1'
 };
 
 var PW = 14, PH = 80, BR = 8;
@@ -587,6 +590,34 @@ function getSelectedSkin() {
   return SKINS[0];
 }
 
+var ROUNDS = [
+  {key:'r1',  label:'R1',     full:'Round 1',       coins:30},
+  {key:'r2',  label:'R2',     full:'Round 2',       coins:40},
+  {key:'r3',  label:'R3',     full:'Round 3',       coins:50},
+  {key:'r4',  label:'R4',     full:'Round 4',       coins:60},
+  {key:'qf',  label:'QF',     full:'Quarterfinal',  coins:80},
+  {key:'sf',  label:'SF',     full:'Semifinal',     coins:100},
+  {key:'f',   label:'FINAL',  full:'Final',         coins:150}
+];
+
+function buildRoundPicker() {
+  var el = document.getElementById('roundPicker');
+  el.innerHTML = '';
+  ROUNDS.forEach(function(r) {
+    var b = document.createElement('button');
+    b.textContent = r.label;
+    b.dataset.round = r.key;
+    var sel = G.selectedRound === r.key;
+    b.style.cssText = 'flex-shrink:0;padding:5px 8px;font-size:11px;font-family:inherit;font-weight:900;border-radius:8px;cursor:pointer;border:2px solid '+(sel?'#FFD700':'rgba(255,255,255,.2)')+';background:'+(sel?'linear-gradient(135deg,#FFD700,#FF8C00)':'rgba(255,255,255,.05)')+';color:'+(sel?'#000':'#fff');
+    b.addEventListener('click', function(){ selectRound(r.key); });
+    el.appendChild(b);
+  });
+}
+function selectRound(key) {
+  G.selectedRound = key;
+  buildRoundPicker();
+}
+
 var SLAM_THEMES = {
   wb:  {surround:'#2d1b5e', stripe1:'#2d7a2d', stripe2:'#348534', label:'WIMBLEDON',  lineColor:'rgba(255,255,255,0.85)'},
   ao:  {surround:'#0a1a3a', stripe1:'#1565c0', stripe2:'#1976d2', label:'AUSTRALIAN OPEN', lineColor:'rgba(255,255,255,0.9)'},
@@ -612,6 +643,7 @@ function goToMenu() {
   G.mysteryBattle = false;
   saveCoins();
   buildSkinGrid();
+  buildRoundPicker();
   show('welcome');
 }
 
@@ -794,11 +826,13 @@ function scorePoint(who) {
 function endMatch(playerWon) {
   G.matchOver = true;
   cancelAnimationFrame(RAF); RAF = null;
+  var rDef = ROUNDS[0];
+  for(var ri=0;ri<ROUNDS.length;ri++) if(ROUNDS[ri].key===G.selectedRound){rDef=ROUNDS[ri];break;}
   if(playerWon){
-    G.coins += 50;
+    G.coins += rDef.coins;
     setMsg('🏆 YOU WIN THE MATCH!');
   } else {
-    G.coins = Math.max(0, G.coins - 50);
+    G.coins = Math.max(0, G.coins - Math.floor(rDef.coins/2));
     setMsg('😔 CPU WINS THE MATCH!');
   }
   saveCoins();
@@ -829,13 +863,13 @@ function endMatch(playerWon) {
       document.getElementById('endSub').textContent = 'You ran out of coins! Better luck next time.';
     } else if(mysteryWin){
       t.textContent = 'MYSTERY SOLVED!';
-      document.getElementById('endSub').textContent = 'You defeated the mystery player! New skin unlocked! +50 coins.';
+      document.getElementById('endSub').textContent = 'You defeated the mystery player! New skin unlocked! +' + rDef.coins + ' coins.';
     } else if(playerWon){
       t.textContent = 'MATCH WIN!';
-      document.getElementById('endSub').textContent = 'Great match! +50 coins. Keep playing to reach 1000!';
+      document.getElementById('endSub').textContent = rDef.full + ' win! +' + rDef.coins + ' coins. Keep playing to reach 1000!';
     } else {
       t.textContent = 'MATCH LOST!';
-      document.getElementById('endSub').textContent = 'CPU wins this time. -50 coins. Reach 1000 coins to win!';
+      document.getElementById('endSub').textContent = rDef.full + ' loss. -' + Math.floor(rDef.coins/2) + ' coins. Keep going!';
     }
     document.getElementById('endCoins').textContent = G.coins;
     var btns = document.querySelector('.end-btns');
@@ -1015,7 +1049,9 @@ function roundRect(x,y,w,h,r){
 function updateScoreboard() {
   document.getElementById('sbPlayerPts').textContent = G.playerPts;
   document.getElementById('sbCpuPts').textContent = G.cpuPts;
-  document.getElementById('sbSet').textContent = 'GAME '+(G.playerGames+G.cpuGames+1);
+  var rLabel = '';
+  for(var ri=0;ri<ROUNDS.length;ri++) if(ROUNDS[ri].key===G.selectedRound){rLabel=ROUNDS[ri].full;break;}
+  document.getElementById('sbSet').textContent = rLabel + ' — GAME '+(G.playerGames+G.cpuGames+1);
 
   var pg = ''; for(var i=0;i<3;i++) pg+='<div class="game-dot'+(i<G.playerGames?' won':'')+'">'+( i<G.playerGames?'✓':'' )+'</div>';
   var cg = ''; for(var i=0;i<3;i++) cg+='<div class="game-dot'+(i<G.cpuGames?' won':'')+'">'+( i<G.cpuGames?'✓':'' )+'</div>';
@@ -1310,6 +1346,7 @@ window.addEventListener('DOMContentLoaded', function(){
   loadSlams();
   G.playerSkin = SKINS[0];
   buildSkinGrid();
+  buildRoundPicker();
   document.getElementById('nameInput').addEventListener('keydown', function(e){
     if(e.key==='Enter') startGame();
   });
