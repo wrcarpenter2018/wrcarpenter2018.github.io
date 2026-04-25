@@ -848,6 +848,13 @@ function endMatch(playerWon) {
   if(playerWon){
     G.coins += rDef.coins;
     setMsg('🏆 YOU WIN THE MATCH!');
+    var ri2 = 0;
+    for(var i=0;i<ROUNDS.length;i++) if(ROUNDS[i].key===G.selectedRound){ri2=i;break;}
+    if(ri2 < ROUNDS.length - 1) {
+      G.selectedRound = ROUNDS[ri2+1].key;
+      var sel = document.getElementById('roundSelect');
+      if(sel) sel.value = G.selectedRound;
+    }
   } else {
     G.coins = Math.max(0, G.coins - Math.floor(rDef.coins/2));
     setMsg('😔 CPU WINS THE MATCH!');
