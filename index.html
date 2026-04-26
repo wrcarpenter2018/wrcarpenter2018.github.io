@@ -991,79 +991,124 @@ function draw() {
 
 function drawPlayer(x, y, w, h, skin, facingRight) {
   var cx = x + w/2;
-  var cy = y + h/2;
+  var dir = facingRight ? -1 : 1; // body offset direction
+  var bx = cx + dir * 26; // body center x
 
-  // Body circle — sits behind the paddle on the baseline side
-  var bx = facingRight ? cx - 32 : cx + 32;
-  var bodyR = 12;
-
-  // Drop shadow under body
-  ctx.fillStyle = 'rgba(0,0,0,0.25)';
+  // === SHADOW ===
+  ctx.fillStyle = 'rgba(0,0,0,0.18)';
   ctx.beginPath();
-  ctx.ellipse(bx + 2, cy + 2, bodyR, bodyR * 0.55, 0, 0, Math.PI * 2);
+  ctx.ellipse(bx, y + h - 2, 14, 5, 0, 0, Math.PI*2);
   ctx.fill();
 
-  // Body shirt
-  ctx.fillStyle = skin.frame;
-  ctx.beginPath();
-  ctx.arc(bx, cy, bodyR, 0, Math.PI * 2);
-  ctx.fill();
-  ctx.strokeStyle = skin.grip;
-  ctx.lineWidth = 2.5;
-  ctx.stroke();
-
-  // Arm from body edge to grip area
-  var armStartX = facingRight ? bx + bodyR : bx - bodyR;
-  var gripY = y + h * 0.65;
-  ctx.strokeStyle = '#c8a07a';
-  ctx.lineWidth = 4;
+  // === LEGS ===
+  var hipY = y + h * 0.62;
+  var footY = y + h - 4;
+  ctx.strokeStyle = '#2a2a2a';
+  ctx.lineWidth = 5;
   ctx.lineCap = 'round';
   ctx.beginPath();
-  ctx.moveTo(armStartX, cy);
-  ctx.lineTo(cx, gripY);
+  ctx.moveTo(bx, hipY);
+  ctx.lineTo(bx - 6, footY);
+  ctx.stroke();
+  ctx.beginPath();
+  ctx.moveTo(bx, hipY);
+  ctx.lineTo(bx + 6, footY);
+  ctx.stroke();
+  // Shoes
+  ctx.fillStyle = '#222';
+  ctx.beginPath(); ctx.ellipse(bx - 6, footY, 6, 3, 0, 0, Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.ellipse(bx + 6, footY, 6, 3, 0, 0, Math.PI*2); ctx.fill();
+
+  // === TORSO ===
+  var torsoTop = y + h * 0.30;
+  var torsoH = hipY - torsoTop;
+  ctx.fillStyle = skin.frame;
+  ctx.beginPath();
+  ctx.roundRect(bx - 9, torsoTop, 18, torsoH, 4);
+  ctx.fill();
+  // Shirt stripe
+  ctx.fillStyle = skin.grip;
+  ctx.beginPath();
+  ctx.roundRect(bx - 3, torsoTop, 6, torsoH, 2);
+  ctx.fill();
+
+  // === ARM (toward racket) ===
+  var shoulderX = facingRight ? bx + 9 : bx - 9;
+  var gripY = y + h * 0.55;
+  ctx.strokeStyle = '#c8a07a';
+  ctx.lineWidth = 5;
+  ctx.lineCap = 'round';
+  ctx.beginPath();
+  ctx.moveTo(shoulderX, torsoTop + 6);
+  ctx.quadraticCurveTo(cx + dir*8, torsoTop + 14, cx, gripY);
   ctx.stroke();
 
-  // Racket grip
-  var gripH = h * 0.30;
-  var gripW = 6;
+  // === RACKET GRIP ===
+  var gripH = h * 0.22;
   ctx.fillStyle = skin.grip;
-  ctx.fillRect(cx - gripW/2, gripY, gripW, gripH);
+  ctx.beginPath();
+  ctx.roundRect(cx - 3, gripY, 6, gripH, 2);
+  ctx.fill();
 
-  // Racket frame oval
-  var headW = 28;
-  var headH = h * 0.58;
+  // === RACKET HEAD ===
+  var headW = 22;
+  var headH = h * 0.46;
   var headY = y + 2;
   var headCY = headY + headH/2;
   ctx.strokeStyle = skin.frame;
   ctx.lineWidth = 4;
   ctx.shadowColor = skin.frame;
-  ctx.shadowBlur = 10;
+  ctx.shadowBlur = 12;
   ctx.beginPath();
-  ctx.moveTo(cx, headY);
-  ctx.bezierCurveTo(cx + headW, headY, cx + headW, headY + headH, cx, headY + headH);
-  ctx.bezierCurveTo(cx - headW, headY + headH, cx - headW, headY, cx, headY);
-  ctx.closePath();
+  ctx.ellipse(cx, headY + headH/2, headW, headH/2, 0, 0, Math.PI*2);
   ctx.stroke();
   ctx.shadowBlur = 0;
 
   // Strings horizontal
-  ctx.strokeStyle = 'rgba(255,255,255,0.38)';
+  ctx.strokeStyle = 'rgba(255,255,255,0.4)';
   ctx.lineWidth = 1;
-  for(var i = 1; i < 6; i++){
-    var sy = headY + (headH / 6) * i;
-    var t = (sy - headCY) / (headH / 2);
-    var hw = headW * Math.sqrt(Math.max(0, 1 - t * t)) * 0.88;
-    ctx.beginPath(); ctx.moveTo(cx - hw, sy); ctx.lineTo(cx + hw, sy); ctx.stroke();
+  for(var i=1;i<6;i++){
+    var sy = headY + (headH/6)*i;
+    var t = (sy - headCY)/(headH/2);
+    var hw = headW * Math.sqrt(Math.max(0, 1 - t*t)) * 0.85;
+    ctx.beginPath(); ctx.moveTo(cx-hw, sy); ctx.lineTo(cx+hw, sy); ctx.stroke();
   }
-  // Strings vertical
-  ctx.beginPath(); ctx.moveTo(cx, headY + 4); ctx.lineTo(cx, headY + headH - 4); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(cx, headY+4); ctx.lineTo(cx, headY+headH-4); ctx.stroke();
 
-  // Player initial on body
+  // === HEAD ===
+  var headR = 10;
+  var headCX = bx;
+  var headTopY = y + h * 0.12;
+  // Neck
+  ctx.fillStyle = '#c8a07a';
+  ctx.fillRect(bx - 3, headTopY + headR, 6, torsoTop - headTopY - headR);
+  // Head circle
+  ctx.fillStyle = '#c8a07a';
+  ctx.beginPath();
+  ctx.arc(headCX, headTopY + headR, headR, 0, Math.PI*2);
+  ctx.fill();
+  // Hair
+  ctx.fillStyle = skin.grip;
+  ctx.beginPath();
+  ctx.arc(headCX, headTopY + headR, headR, Math.PI, 0);
+  ctx.fill();
+  // Eyes
   ctx.fillStyle = '#fff';
-  ctx.font = 'bold 9px Arial Black, Arial';
+  var eyeDir = facingRight ? 3 : -3;
+  ctx.beginPath(); ctx.arc(headCX + eyeDir, headTopY + headR, 2, 0, Math.PI*2); ctx.fill();
+  ctx.fillStyle = '#222';
+  ctx.beginPath(); ctx.arc(headCX + eyeDir + (facingRight?0.5:-0.5), headTopY + headR, 1, 0, Math.PI*2); ctx.fill();
+
+  // Abbr label
+  ctx.fillStyle = 'rgba(0,0,0,0.7)';
+  ctx.beginPath();
+  ctx.roundRect(bx - 11, y + h * 0.38, 22, 12, 3);
+  ctx.fill();
+  ctx.fillStyle = '#fff';
+  ctx.font = 'bold 8px Arial Black, Arial';
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
-  ctx.fillText(skin.abbr, bx, cy);
+  ctx.fillText(skin.abbr, bx, y + h * 0.44);
   ctx.textBaseline = 'alphabetic';
 }
 
