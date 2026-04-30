@@ -1706,7 +1706,13 @@ function nextBetterRound() {
   BT.cat = BETTER_CATS[Math.floor(Math.random()*BETTER_CATS.length)];
   var pool = shuffleArr(BETTER_PLAYERS.slice());
   BT.p1 = pool[0]; BT.p2 = pool[1];
-  while(BT.p1[BT.cat.key] === BT.p2[BT.cat.key]) { pool = shuffleArr(BETTER_PLAYERS.slice()); BT.p1=pool[0]; BT.p2=pool[1]; }
+  var tries = 0;
+  while(BT.p1[BT.cat.key] === BT.p2[BT.cat.key] && tries < 50) {
+    pool = shuffleArr(BETTER_PLAYERS.slice());
+    BT.p1 = pool[0]; BT.p2 = pool[1];
+    tries++;
+  }
+  if(tries >= 50) { BT.cat = BETTER_CATS[1]; pool = shuffleArr(BETTER_PLAYERS.slice()); BT.p1=pool[0]; BT.p2=pool[1]; }
   document.getElementById('betterCategory').textContent = BT.cat.label;
   document.getElementById('betterScore').textContent = 'Round ' + (BT.round+1) + ' / ' + BT.total + '  |  Earned: ' + BT.earned + ' coins';
   document.getElementById('betterFeedback').textContent = '';
