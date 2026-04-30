@@ -322,6 +322,13 @@ body{font-family:Arial Black,Arial,sans-serif;background:#0a0a1a;color:#fff;min-
     <div class="vault-btns">
       <button class="end-btn" id="betterPlayBtn" onclick="startBetter()" disabled style="opacity:.4;background:linear-gradient(135deg,#FFD700,#FF8C00);color:#000;width:100%">🏆 WHO'S BETTER?</button>
     </div>
+    <div class="trivia-unlock locked" id="wheelUnlock">
+      <div class="trivia-unlock-title" id="wheelUnlockTitle">🔒 Country Wheel</div>
+      <div class="trivia-unlock-sub" id="wheelUnlockSub">Reach 800 coins to unlock!</div>
+    </div>
+    <div class="vault-btns">
+      <button class="end-btn" id="wheelPlayBtn" onclick="startWheel()" disabled style="opacity:.4;background:linear-gradient(135deg,#00c9ff,#0077ff);color:#fff;width:100%">🌍 COUNTRY WHEEL</button>
+    </div>
     <div class="vault-section-lbl">🏆 Trophy Cabinet</div>
     <div id="vaultTrophyRow" style="display:flex;gap:8px;width:100%;justify-content:center;flex-wrap:wrap;margin-bottom:4px"></div>
     <div class="vault-section-lbl">Grand Slam Trophies</div>
@@ -344,6 +351,30 @@ body{font-family:Arial Black,Arial,sans-serif;background:#0a0a1a;color:#fff;min-
   </div>
   <div id="slamGrid" style="display:grid;grid-template-columns:1fr 1fr;gap:12px;max-width:400px;margin:0 auto;padding:0 14px"></div>
   <div style="text-align:center;margin-top:16px;padding-bottom:20px">
+    <button class="end-btn vault" onclick="openVault()">← BACK TO VAULT</button>
+  </div>
+</div>
+
+<!-- COUNTRY WHEEL -->
+<div id="wheel" class="hidden">
+  <div style="text-align:center;padding:14px 14px 4px">
+    <div style="font-size:22px;font-weight:900;background:linear-gradient(135deg,#FFD700,#FF8C00);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">🌍 COUNTRY WHEEL</div>
+    <div style="font-size:11px;color:#888;margin:4px 0">Spin to collect countries!</div>
+    <div style="font-size:13px;font-weight:900;color:#4caf50" id="wheelCoinsEarned"></div>
+  </div>
+  <div style="position:relative;display:flex;justify-content:center;align-items:center;margin:4px auto">
+    <div style="position:absolute;top:-10px;left:50%;transform:translateX(-50%);font-size:28px;z-index:10;filter:drop-shadow(0 2px 4px rgba(0,0,0,0.8))">▼</div>
+    <canvas id="wheelCanvas" width="300" height="300"></canvas>
+  </div>
+  <div style="text-align:center;margin-top:6px">
+    <div style="font-size:18px;font-weight:900;min-height:28px;letter-spacing:1px" id="wheelResult"></div>
+    <button id="spinBtn" onclick="spinWheel()" style="margin-top:8px;padding:10px 32px;font-size:14px;font-family:inherit;font-weight:900;text-transform:uppercase;letter-spacing:2px;background:linear-gradient(135deg,#FFD700,#FF8C00);border:none;border-radius:10px;color:#000;cursor:pointer">🎰 SPIN!</button>
+  </div>
+  <div style="padding:10px 14px 4px">
+    <div style="font-size:9px;letter-spacing:2px;color:#555;text-transform:uppercase;margin-bottom:6px">YOUR COUNTRIES</div>
+    <div id="collectedCountries" style="display:flex;flex-wrap:wrap;gap:6px;justify-content:center;min-height:30px"></div>
+  </div>
+  <div style="text-align:center;margin-top:8px;padding-bottom:20px">
     <button class="end-btn vault" onclick="openVault()">← BACK TO VAULT</button>
   </div>
 </div>
@@ -1202,7 +1233,7 @@ function setMsg(msg) {
 
 function show(id) {
   if(id !== 'matching' && M.timer){ clearInterval(M.timer); M.timer = null; }
-  ['welcome','game','end','vault','trivia','upgrades','matching','slams','better'].forEach(function(s){
+  ['welcome','game','end','vault','trivia','upgrades','matching','slams','better','wheel'].forEach(function(s){
     document.getElementById(s).classList.toggle('hidden', s!==id);
   });
 }
@@ -1256,6 +1287,14 @@ function openVault() {
   var bbtn = document.getElementById('betterPlayBtn');
   bbtn.disabled = !betterUnlocked;
   bbtn.style.opacity = betterUnlocked ? '1' : '0.4';
+  var wheelUnlocked = G.coins >= 800;
+  document.getElementById('wheelUnlock').className = 'trivia-unlock' + (wheelUnlocked ? '' : ' locked');
+  document.getElementById('wheelUnlockTitle').textContent = wheelUnlocked ? '🔓 Country Wheel — UNLOCKED!' : '🔒 Country Wheel';
+  document.getElementById('wheelUnlockSub').textContent = wheelUnlocked ? 'Spin to collect countries!' : 'Reach 800 coins to unlock. (' + G.coins + ' / 800)';
+  var wbtn = document.getElementById('wheelPlayBtn');
+  wbtn.disabled = !wheelUnlocked;
+  wbtn.style.opacity = wheelUnlocked ? '1' : '0.4';
+  renderCollectedCountries();
   var trophyRow = document.getElementById('vaultTrophyRow');
   trophyRow.innerHTML = '';
   var ALL_TOURNEY_KEYS = ['wb','ao','rg','uso','iw','mia','mc','mad','rom','cin','sha','par','can','rot','rio','dub','aca','bar','hal','que','ham','was','tok','bas','vie'];
@@ -1521,6 +1560,106 @@ function drawQR(canvasId, text) {
   img.src = 'https://chart.googleapis.com/chart?cht=qr&chs=200x200&chl=' + encodeURIComponent(text) + '&choe=UTF-8';
 }
 
+// ===== COUNTRY WHEEL =====
+var WHEEL_COUNTRIES = [
+  {name:'Spain',        e:'🇪🇸'}, {name:'Serbia',       e:'🇷🇸'},
+  {name:'Switzerland',  e:'🇨🇭'}, {name:'Italy',        e:'🇮🇹'},
+  {name:'USA',          e:'🇺🇸'}, {name:'Germany',      e:'🇩🇪'},
+  {name:'Russia',       e:'🇷🇺'}, {name:'France',       e:'🇫🇷'},
+  {name:'Australia',    e:'🇦🇺'}, {name:'Great Britain',e:'🇬🇧'},
+  {name:'Argentina',    e:'🇦🇷'}, {name:'Japan',        e:'🇯🇵'},
+  {name:'Denmark',      e:'🇩🇰'}, {name:'Norway',       e:'🇳🇴'},
+  {name:'Poland',       e:'🇵🇱'}, {name:'Greece',       e:'🇬🇷'}
+];
+var WHEEL_COLORS = ['#e74c3c','#3498db','#2ecc71','#f39c12','#9b59b6','#1abc9c','#e67e22','#34495e',
+                    '#c0392b','#2980b9','#27ae60','#d35400','#8e44ad','#16a085','#f1c40f','#7f8c8d'];
+var WHL = {spinning:false, angle:0, velocity:0, raf:null};
+var COLLECTED_COUNTRIES = {};
+function saveCountries(){ try{localStorage.setItem('lfo_countries',JSON.stringify(COLLECTED_COUNTRIES));}catch(e){} }
+function loadCountries(){ try{var v=JSON.parse(localStorage.getItem('lfo_countries'));if(v)COLLECTED_COUNTRIES=v;}catch(e){} }
+
+function startWheel() {
+  if(G.coins < 800) return;
+  loadCountries();
+  show('wheel');
+  renderCollectedCountries();
+  drawWheel(WHL.angle);
+}
+
+function drawWheel(angle) {
+  var wc = document.getElementById('wheelCanvas');
+  if(!wc) return;
+  var wctx = wc.getContext('2d');
+  var cx=150, cy=150, r=130, n=WHEEL_COUNTRIES.length;
+  var arc = (Math.PI*2)/n;
+  wctx.clearRect(0,0,300,300);
+  for(var i=0;i<n;i++){
+    var start = angle + i*arc;
+    wctx.beginPath();
+    wctx.moveTo(cx,cy);
+    wctx.arc(cx,cy,r,start,start+arc);
+    wctx.fillStyle = WHEEL_COLORS[i];
+    wctx.fill();
+    wctx.strokeStyle='rgba(255,255,255,0.3)'; wctx.lineWidth=1; wctx.stroke();
+    wctx.save();
+    wctx.translate(cx,cy);
+    wctx.rotate(start+arc/2);
+    wctx.textAlign='right'; wctx.textBaseline='middle';
+    wctx.font='18px serif';
+    wctx.fillText(WHEEL_COUNTRIES[i].e, r-8, 0);
+    wctx.restore();
+  }
+  // Center circle
+  wctx.beginPath(); wctx.arc(cx,cy,18,0,Math.PI*2);
+  wctx.fillStyle='#1a1a2e'; wctx.fill();
+  wctx.strokeStyle='#4caf50'; wctx.lineWidth=3; wctx.stroke();
+}
+
+function spinWheel() {
+  if(WHL.spinning) return;
+  WHL.spinning = true;
+  document.getElementById('spinBtn').disabled = true;
+  document.getElementById('wheelResult').textContent = '';
+  document.getElementById('wheelCoinsEarned').textContent = '';
+  WHL.velocity = 0.18 + Math.random()*0.14;
+  var decel = 0.995;
+  function frame() {
+    WHL.angle += WHL.velocity;
+    WHL.velocity *= decel;
+    drawWheel(WHL.angle);
+    if(WHL.velocity > 0.003) {
+      WHL.raf = requestAnimationFrame(frame);
+    } else {
+      WHL.spinning = false;
+      document.getElementById('spinBtn').disabled = false;
+      var n = WHEEL_COUNTRIES.length;
+      var arc = (Math.PI*2)/n;
+      var pointer = -Math.PI/2;
+      var norm = ((pointer - WHL.angle) % (Math.PI*2) + Math.PI*2) % (Math.PI*2);
+      var idx = Math.floor(norm/arc) % n;
+      var landed = WHEEL_COUNTRIES[idx];
+      COLLECTED_COUNTRIES[landed.name] = true;
+      saveCountries();
+      G.coins += 15; saveCoins();
+      document.getElementById('wheelResult').textContent = landed.e + ' ' + landed.name + '!';
+      document.getElementById('wheelCoinsEarned').textContent = '+15 coins earned!';
+      renderCollectedCountries();
+    }
+  }
+  requestAnimationFrame(frame);
+}
+
+function renderCollectedCountries() {
+  var el = document.getElementById('collectedCountries');
+  if(!el) return;
+  var keys = Object.keys(COLLECTED_COUNTRIES);
+  if(keys.length===0){ el.innerHTML='<div style="font-size:11px;color:#444">None yet — spin to collect!</div>'; return; }
+  el.innerHTML = keys.map(function(k){
+    var c = WHEEL_COUNTRIES.filter(function(x){return x.name===k;})[0];
+    return c ? '<div style="text-align:center"><div style="font-size:24px">'+c.e+'</div><div style="font-size:7px;color:#888">'+c.name+'</div></div>' : '';
+  }).join('');
+}
+
 // ===== WHO'S BETTER =====
 var BETTER_PLAYERS = [
   {name:'Sinner',          e:'🇮🇹',slams:2, titles:22},
@@ -1750,6 +1889,7 @@ window.addEventListener('DOMContentLoaded', function(){
   loadWonSkins();
   loadSlams();
   loadTrophies();
+  loadCountries();
   G.playerSkin = SKINS[0];
   buildSkinGrid();
   buildRoundPicker();
