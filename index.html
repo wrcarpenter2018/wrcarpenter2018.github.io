@@ -1724,8 +1724,25 @@ function renderCollectedCountries() {
   if(keys.length===0){ el.innerHTML='<div style="font-size:11px;color:#444">None yet — spin to collect!</div>'; return; }
   el.innerHTML = keys.map(function(k){
     var c = WHEEL_COUNTRIES.filter(function(x){return x.name===k;})[0];
-    return c ? '<div style="text-align:center"><div style="font-size:24px">'+c.e+'</div><div style="font-size:7px;color:#888">'+c.name+'</div></div>' : '';
+    if(!c) return '';
+    return '<button onclick="showCountryInfo(\''+k+'\')" style="background:rgba(255,255,255,0.08);border:2px solid rgba(76,175,80,0.4);border-radius:10px;padding:6px 8px;cursor:pointer;text-align:center;transition:all 0.2s" onmouseover="this.style.borderColor=\'#4caf50\'" onmouseout="this.style.borderColor=\'rgba(76,175,80,0.4)\'">'
+      +'<div style="font-size:24px">'+c.e+'</div>'
+      +'<div style="font-size:7px;color:#aaa;font-weight:900;letter-spacing:1px">'+c.name+'</div>'
+      +'</button>';
   }).join('');
+}
+
+function showCountryInfo(name) {
+  var info = COUNTRY_INFO[name] || {stars:'Top ATP players', fact:'A great tennis nation!'};
+  var c = WHEEL_COUNTRIES.filter(function(x){return x.name===name;})[0];
+  var infoEl = document.getElementById('countryInfo');
+  if(infoEl){
+    infoEl.style.display = 'block';
+    infoEl.innerHTML = '<div style="color:#FFD700;font-weight:900;font-size:13px;margin-bottom:4px">'+(c?c.e+' ':'')+name+'</div>'
+      +'<div style="color:#FFD700;font-weight:900;margin-bottom:4px">⭐ Stars: '+info.stars+'</div>'
+      +'<div style="color:#ccc">'+info.fact+'</div>';
+    infoEl.scrollIntoView({behavior:'smooth', block:'nearest'});
+  }
 }
 
 // ===== WHO'S BETTER =====
