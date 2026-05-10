@@ -1800,7 +1800,7 @@ function startF1Race(team, driver) {
   document.getElementById('f1msg').textContent='';
   document.getElementById('f1driverDisp').textContent = '#'+driver.num+' '+driver.name;
   for(var i=0;i<9;i++){
-    F1G.aiCars.push({lane:Math.floor(Math.random()*3), y:-80-i*110, team:F1_TEAMS[(i+1)%F1_TEAMS.length], spd:2+Math.random()*2.5});
+    F1G.aiCars.push({lane:i%3, y:-80-i*130, team:F1_TEAMS[(i+1)%F1_TEAMS.length], spd:2+Math.random()*2.5, passed:false});
   }
   var canvas=document.getElementById('f1canvas');
   var ctx=canvas.getContext('2d');
@@ -1845,7 +1845,20 @@ function f1Update() {
         F1G.msgTimer=setTimeout(function(){document.getElementById('f1msg').textContent='';},1400);
       }
     }
-    if(c.y>F1_H+60){ c.y=-80-Math.random()*100; c.lane=Math.floor(Math.random()*3); c.spd=2+Math.random()*2.5; c.passed=false; }
+    if(c.y>F1_H+60){
+      var topY = -120;
+      // find a lane not occupied near the top
+      var tries=0, newLane=Math.floor(Math.random()*3);
+      while(tries<10){
+        var blocked=false;
+        for(var j=0;j<F1G.aiCars.length;j++){
+          if(j!==i && F1G.aiCars[j].lane===newLane && F1G.aiCars[j].y<0) blocked=true;
+        }
+        if(!blocked) break;
+        newLane=(newLane+1)%3; tries++;
+      }
+      c.y=topY - Math.random()*60; c.lane=newLane; c.spd=2+Math.random()*2.5; c.passed=false;
+    }
   }
   if(collision){
     F1G.clearTicks=0;
