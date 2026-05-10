@@ -1703,10 +1703,10 @@ var F1_TEAMS = [
 ];
 
 var F1_UPGRADE_DEFS = [
-  {key:'engine', icon:'⚡', name:'Engine',    desc:'Higher top speed',          cost:200},
-  {key:'tires',  icon:'🔄', name:'Soft Tires',desc:'Less crash speed loss',     cost:150},
-  {key:'aero',   icon:'🌬️', name:'Aero Kit',  desc:'Gain positions faster',     cost:250},
-  {key:'drs',    icon:'🚀', name:'DRS',        desc:'Faster acceleration',       cost:300}
+  {key:'engine', icon:'⚡', name:'Engine',    desc:'Higher top speed',          cost:0},
+  {key:'tires',  icon:'🔄', name:'Soft Tires',desc:'Less crash speed loss',     cost:0},
+  {key:'aero',   icon:'🌬️', name:'Aero Kit',  desc:'Gain positions faster',     cost:0},
+  {key:'drs',    icon:'🚀', name:'DRS',        desc:'Faster acceleration',       cost:0}
 ];
 var F1_UPGRADES = {engine:0,tires:0,aero:0,drs:0};
 function saveF1Upgrades(){ try{localStorage.setItem('lfo_f1upg',JSON.stringify(F1_UPGRADES));}catch(e){} }
@@ -1731,9 +1731,7 @@ function renderF1Upgrades(){
       +'<div style="font-size:9px;color:#888;margin:3px 0 6px">'+def.desc+'</div>'
       +(owned
         ?'<div style="font-size:10px;font-weight:900;color:#e10600">✅ ACTIVE</div>'
-        :'<button onclick="buyF1Upgrade(\''+def.key+'\')" '+(canAfford?'':'disabled')
-          +' style="background:'+(canAfford?'linear-gradient(135deg,#e10600,#ff6b00)':'#333')+';border:none;border-radius:6px;padding:4px 10px;color:#fff;font-family:inherit;font-size:10px;font-weight:900;cursor:'+(canAfford?'pointer':'not-allowed')+';opacity:'+(canAfford?'1':'0.5')+'">'
-          +(canAfford?'UNLOCK '+def.cost+' 🪙':'NEED '+def.cost+' 🪙')+'</button>');
+        :'<button onclick="buyF1Upgrade(\''+def.key+'\')" style="background:linear-gradient(135deg,#e10600,#ff6b00);border:none;border-radius:6px;padding:4px 10px;color:#fff;font-family:inherit;font-size:10px;font-weight:900;cursor:pointer">UNLOCK FREE</button>');
     g.appendChild(card);
   });
 }
