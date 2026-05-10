@@ -331,6 +331,13 @@ body{font-family:Arial Black,Arial,sans-serif;background:#0a0a1a;color:#fff;min-
     <div class="vault-btns">
       <button class="end-btn" id="wheelPlayBtn" onclick="startWheel()" disabled style="opacity:.4;background:linear-gradient(135deg,#00c9ff,#0077ff);color:#fff;width:100%">🌍 COUNTRY WHEEL</button>
     </div>
+    <div class="trivia-unlock locked" id="f1Unlock">
+      <div class="trivia-unlock-title" id="f1UnlockTitle">🔒 F1 Race</div>
+      <div class="trivia-unlock-sub" id="f1UnlockSub">Reach 900 coins to unlock!</div>
+    </div>
+    <div class="vault-btns">
+      <button class="end-btn" id="f1PlayBtn" onclick="openF1()" disabled style="opacity:.4;background:linear-gradient(135deg,#e10600,#ff6b00);color:#fff;width:100%">🏎️ F1 RACE</button>
+    </div>
     <div class="vault-section-lbl">🏆 Trophy Cabinet</div>
     <div id="vaultTrophyRow" style="display:flex;gap:8px;width:100%;justify-content:center;flex-wrap:wrap;margin-bottom:4px"></div>
     <div class="vault-section-lbl">Grand Slam Trophies</div>
@@ -385,6 +392,59 @@ body{font-family:Arial Black,Arial,sans-serif;background:#0a0a1a;color:#fff;min-
   </div>
   <div style="text-align:center;margin-top:8px;padding-bottom:20px">
     <button class="end-btn vault" onclick="openVault()">← BACK TO VAULT</button>
+  </div>
+</div>
+
+<!-- F1 RACE -->
+<div id="f1game" class="hidden" style="min-height:100vh;background:#111;display:flex;flex-direction:column;align-items:center;padding:10px">
+  <!-- Team & Driver Select -->
+  <div id="f1select" style="width:100%;max-width:420px">
+    <div style="text-align:center;padding:10px 0 6px">
+      <div style="font-size:24px;font-weight:900;background:linear-gradient(135deg,#e10600,#ff6b00);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;letter-spacing:2px">🏎️ F1 RACE</div>
+      <div style="font-size:11px;color:#888;margin-top:3px">Pick your team — then your driver!</div>
+    </div>
+    <!-- Step 1: Team -->
+    <div id="f1stepTeam">
+      <div style="font-size:9px;letter-spacing:2px;color:#e10600;text-transform:uppercase;text-align:center;margin-bottom:6px">STEP 1 — CHOOSE YOUR TEAM</div>
+      <div id="f1teamGrid" style="display:grid;grid-template-columns:1fr 1fr;gap:6px;padding:0 8px"></div>
+    </div>
+    <!-- Step 2: Driver -->
+    <div id="f1stepDriver" style="display:none">
+      <div style="font-size:9px;letter-spacing:2px;color:#e10600;text-transform:uppercase;text-align:center;margin-bottom:6px">STEP 2 — CHOOSE YOUR DRIVER</div>
+      <div id="f1driverCards" style="display:flex;gap:10px;justify-content:center;padding:0 8px"></div>
+      <div style="text-align:center;margin-top:8px">
+        <button onclick="document.getElementById('f1stepTeam').style.display='';document.getElementById('f1stepDriver').style.display='none'" style="background:rgba(255,255,255,.08);border:1px solid #444;border-radius:8px;padding:6px 16px;color:#aaa;font-family:inherit;font-size:11px;cursor:pointer">← Back to Teams</button>
+      </div>
+    </div>
+    <div style="text-align:center;margin-top:10px;padding-bottom:14px">
+      <button onclick="openVault()" style="background:rgba(255,255,255,.08);border:1px solid #444;border-radius:8px;padding:6px 20px;color:#aaa;font-family:inherit;font-size:11px;font-weight:900;cursor:pointer">← VAULT</button>
+    </div>
+  </div>
+  <!-- Race Canvas -->
+  <div id="f1race" style="display:none;width:100%;max-width:420px;text-align:center">
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:4px 10px 6px;max-width:320px;margin:0 auto">
+      <div style="font-size:13px;font-weight:900;letter-spacing:1px" id="f1posDisp">10th</div>
+      <div style="font-size:11px;color:#e10600;font-weight:900" id="f1driverDisp">Driver</div>
+      <div style="font-size:13px;font-weight:900;color:#FFD700" id="f1timeDisp">30s</div>
+    </div>
+    <canvas id="f1canvas" width="300" height="480" style="display:block;margin:0 auto;border-radius:8px;border:2px solid #333"></canvas>
+    <div style="font-size:12px;font-weight:900;min-height:20px;margin-top:4px;letter-spacing:1px" id="f1msg"></div>
+    <div style="display:flex;gap:12px;justify-content:center;margin-top:8px;padding-bottom:14px">
+      <button ontouchstart="f1Steer(-1)" onmousedown="f1Steer(-1)" style="background:linear-gradient(135deg,#333,#555);border:none;border-radius:10px;padding:14px 28px;font-size:18px;color:#fff;cursor:pointer;font-family:inherit;font-weight:900;-webkit-tap-highlight-color:transparent;user-select:none">◀</button>
+      <button ontouchstart="f1Steer(1)" onmousedown="f1Steer(1)" style="background:linear-gradient(135deg,#333,#555);border:none;border-radius:10px;padding:14px 28px;font-size:18px;color:#fff;cursor:pointer;font-family:inherit;font-weight:900;-webkit-tap-highlight-color:transparent;user-select:none">▶</button>
+    </div>
+  </div>
+  <!-- Result -->
+  <div id="f1result" style="display:none;text-align:center;padding:30px 16px;width:100%;max-width:400px">
+    <div id="f1resEmoji" style="font-size:64px;line-height:1.1"></div>
+    <div id="f1resPos" style="font-size:28px;font-weight:900;letter-spacing:2px;margin-top:8px;background:linear-gradient(135deg,#FFD700,#FF8C00);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text"></div>
+    <div id="f1resTeam" style="font-size:13px;color:#aaa;margin-top:6px"></div>
+    <div id="f1resCoins" style="font-size:32px;font-weight:900;color:#FFD700;margin-top:14px"></div>
+    <div id="f1resTotal" style="font-size:11px;color:#888;margin-top:4px"></div>
+    <div style="display:flex;gap:10px;justify-content:center;margin-top:20px">
+      <button onclick="startF1Race(F1G.team,F1G.driver)" style="background:linear-gradient(135deg,#e10600,#ff6b00);border:none;border-radius:10px;padding:10px 20px;color:#fff;font-family:inherit;font-size:12px;font-weight:900;cursor:pointer;letter-spacing:1px">🏎️ RACE AGAIN</button>
+      <button onclick="openVault()" style="background:linear-gradient(135deg,#7b2ff7,#4a00b4);border:none;border-radius:10px;padding:10px 20px;color:#fff;font-family:inherit;font-size:12px;font-weight:900;cursor:pointer;letter-spacing:1px">🏦 VAULT</button>
+    </div>
   </div>
 </div>
 
@@ -1284,7 +1344,8 @@ function setMsg(msg) {
 
 function show(id) {
   if(id !== 'matching' && M.timer){ clearInterval(M.timer); M.timer = null; }
-  ['welcome','game','end','vault','trivia','upgrades','matching','slams','better','wheel'].forEach(function(s){
+  if(id !== 'f1game' && F1G.raf){ cancelAnimationFrame(F1G.raf); F1G.raf = null; F1G.over = true; }
+  ['welcome','game','end','vault','trivia','upgrades','matching','slams','better','wheel','f1game'].forEach(function(s){
     document.getElementById(s).classList.toggle('hidden', s!==id);
   });
 }
@@ -1345,6 +1406,13 @@ function openVault() {
   var wbtn = document.getElementById('wheelPlayBtn');
   wbtn.disabled = !wheelUnlocked;
   wbtn.style.opacity = wheelUnlocked ? '1' : '0.4';
+  var f1Unlocked = G.coins >= 900;
+  document.getElementById('f1Unlock').className = 'trivia-unlock' + (f1Unlocked ? '' : ' locked');
+  document.getElementById('f1UnlockTitle').textContent = f1Unlocked ? '🔓 F1 Race — UNLOCKED!' : '🔒 F1 Race';
+  document.getElementById('f1UnlockSub').textContent = f1Unlocked ? 'Pick your team, pick your driver, race!' : 'Reach 900 coins to unlock. (' + G.coins + ' / 900)';
+  var f1btn = document.getElementById('f1PlayBtn');
+  f1btn.disabled = !f1Unlocked;
+  f1btn.style.opacity = f1Unlocked ? '1' : '0.4';
   renderCollectedCountries();
   var trophyRow = document.getElementById('vaultTrophyRow');
   trophyRow.innerHTML = '';
@@ -1609,6 +1677,187 @@ function drawQR(canvasId, text) {
     ctx2.fillText('wrcarpenter2018.github.io', c.width/2, 46);
   };
   img.src = 'https://chart.googleapis.com/chart?cht=qr&chs=200x200&chl=' + encodeURIComponent(text) + '&choe=UTF-8';
+}
+
+// ===== F1 RACE =====
+var F1_TEAMS = [
+  {name:'Red Bull',    e:'🐂', c:'#1e41ff', a:'#cc1e00', drivers:[{name:'Verstappen',num:1},{name:'Lawson',num:30}]},
+  {name:'Mercedes',   e:'⭐',  c:'#00d2be', a:'#111',    drivers:[{name:'Russell',num:63},{name:'Antonelli',num:12}]},
+  {name:'Ferrari',    e:'🐎', c:'#dc0000', a:'#fff200', drivers:[{name:'Leclerc',num:16},{name:'Hamilton',num:44}]},
+  {name:'McLaren',    e:'🟠', c:'#ff8000', a:'#111',    drivers:[{name:'Norris',num:4},{name:'Piastri',num:81}]},
+  {name:'Aston Martin',e:'💚',c:'#006f62', a:'#cedc00', drivers:[{name:'Alonso',num:14},{name:'Stroll',num:18}]},
+  {name:'Alpine',     e:'🔵', c:'#0090ff', a:'#ff69b4', drivers:[{name:'Gasly',num:10},{name:'Doohan',num:7}]},
+  {name:'Williams',   e:'🔷', c:'#2244bb', a:'#fff',    drivers:[{name:'Sainz',num:55},{name:'Albon',num:23}]},
+  {name:'Haas',       e:'⬛', c:'#888888', a:'#e8002d', drivers:[{name:'Magnussen',num:20},{name:'Bearman',num:87}]},
+  {name:'Kick Sauber',e:'🟩', c:'#00c853', a:'#111',    drivers:[{name:'Hulkenberg',num:27},{name:'Bottas',num:77}]},
+  {name:'Racing Bulls',e:'🐮',c:'#4e7c99', a:'#cc1e00', drivers:[{name:'Tsunoda',num:22},{name:'Hadjar',num:6}]}
+];
+
+var F1G = { team:null, driver:null, lane:1, over:false, raf:null, duration:0, offset:0, speed:6, position:10, clearTicks:0, collideTick:0, aiCars:[], msgTimer:null };
+var F1_W=300, F1_H=480, F1_LANES=[50,150,250], F1_CW=44, F1_CH=68, F1_PLAYER_Y=390;
+
+function openF1() {
+  show('f1game');
+  document.getElementById('f1select').style.display='';
+  document.getElementById('f1race').style.display='none';
+  document.getElementById('f1result').style.display='none';
+  document.getElementById('f1stepTeam').style.display='';
+  document.getElementById('f1stepDriver').style.display='none';
+  renderF1Teams();
+}
+
+function renderF1Teams() {
+  var g = document.getElementById('f1teamGrid');
+  g.innerHTML = '';
+  F1_TEAMS.forEach(function(t) {
+    var b = document.createElement('button');
+    b.style.cssText = 'background:'+t.c+'20;border:2px solid '+t.c+';border-radius:10px;padding:8px 4px;cursor:pointer;font-family:inherit;color:#fff;text-align:center;width:100%';
+    b.innerHTML = '<div style="font-size:22px">'+t.e+'</div>'
+      +'<div style="font-size:10px;font-weight:900;color:'+t.c+';letter-spacing:1px">'+t.name.toUpperCase()+'</div>'
+      +'<div style="font-size:8px;color:#aaa;margin-top:2px">'+t.drivers[0].name+' / '+t.drivers[1].name+'</div>';
+    b.onclick = (function(team){ return function(){ selectF1Team(team); }; })(t);
+    g.appendChild(b);
+  });
+}
+
+function selectF1Team(team) {
+  F1G.team = team;
+  document.getElementById('f1stepTeam').style.display='none';
+  document.getElementById('f1stepDriver').style.display='';
+  var dc = document.getElementById('f1driverCards');
+  dc.innerHTML = '';
+  team.drivers.forEach(function(drv) {
+    var b = document.createElement('button');
+    b.style.cssText = 'background:'+team.c+'25;border:3px solid '+team.c+';border-radius:12px;padding:14px 18px;cursor:pointer;font-family:inherit;color:#fff;text-align:center;min-width:120px';
+    b.innerHTML = '<div style="font-size:28px;font-weight:900;color:'+team.c+'">'+drv.num+'</div>'
+      +'<div style="font-size:13px;font-weight:900;letter-spacing:1px;margin-top:4px">'+drv.name.toUpperCase()+'</div>'
+      +'<div style="font-size:9px;color:#aaa;margin-top:3px">'+team.name+'</div>';
+    b.onclick = (function(d){ return function(){ startF1Race(team,d); }; })(drv);
+    dc.appendChild(b);
+  });
+}
+
+function startF1Race(team, driver) {
+  F1G.team = team; F1G.driver = driver;
+  F1G.lane = 1; F1G.over = false; F1G.duration = 0;
+  F1G.offset = 0; F1G.speed = 6; F1G.position = 10;
+  F1G.clearTicks = 0; F1G.collideTick = 0; F1G.aiCars = [];
+  if(F1G.raf){ cancelAnimationFrame(F1G.raf); F1G.raf = null; }
+  if(F1G.msgTimer){ clearTimeout(F1G.msgTimer); }
+  document.getElementById('f1select').style.display='none';
+  document.getElementById('f1race').style.display='';
+  document.getElementById('f1result').style.display='none';
+  document.getElementById('f1msg').textContent='';
+  document.getElementById('f1driverDisp').textContent = '#'+driver.num+' '+driver.name;
+  for(var i=0;i<9;i++){
+    F1G.aiCars.push({lane:Math.floor(Math.random()*3), y:-80-i*110, team:F1_TEAMS[(i+1)%F1_TEAMS.length], spd:2+Math.random()*2.5});
+  }
+  var canvas=document.getElementById('f1canvas');
+  var ctx=canvas.getContext('2d');
+  function loop(){
+    if(F1G.over) return;
+    f1Update();
+    f1Draw(ctx);
+    F1G.raf=requestAnimationFrame(loop);
+  }
+  loop();
+}
+
+function f1Steer(dir) {
+  if(F1G.over) return;
+  F1G.lane = Math.max(0, Math.min(2, F1G.lane+dir));
+}
+
+function f1Update() {
+  F1G.duration++;
+  F1G.offset = (F1G.offset + F1G.speed) % 80;
+  var collision = false;
+  for(var i=0;i<F1G.aiCars.length;i++){
+    var c=F1G.aiCars[i];
+    c.y += c.spd;
+    if(c.lane===F1G.lane){
+      var pt=F1_PLAYER_Y-F1_CH/2, pb=F1_PLAYER_Y+F1_CH/2;
+      var ct=c.y-F1_CH/2, cb=c.y+F1_CH/2;
+      if(cb>pt&&ct<pb) collision=true;
+    }
+    if(c.y>F1_H+60){ c.y=-80-Math.random()*100; c.lane=Math.floor(Math.random()*3); c.spd=2+Math.random()*2.5; }
+  }
+  if(collision){
+    F1G.clearTicks=0;
+    F1G.speed=Math.max(3,F1G.speed-0.08);
+    F1G.collideTick++;
+    if(F1G.collideTick%80===0&&F1G.position<10) F1G.position=Math.min(10,F1G.position+1);
+    if(F1G.collideTick===1){ document.getElementById('f1msg').textContent='💥 COLLISION!'; }
+  } else {
+    F1G.collideTick=0;
+    F1G.clearTicks++;
+    F1G.speed=Math.min(11,F1G.speed+0.025);
+    if(F1G.clearTicks>0&&F1G.clearTicks%110===0&&F1G.position>1){
+      F1G.position--;
+      var posLabels=['1st','2nd','3rd','4th','5th','6th','7th','8th','9th','10th'];
+      document.getElementById('f1msg').textContent='⬆️ UP TO '+posLabels[F1G.position-1]+'!';
+      if(F1G.msgTimer) clearTimeout(F1G.msgTimer);
+      F1G.msgTimer=setTimeout(function(){document.getElementById('f1msg').textContent='';},1500);
+    }
+  }
+  var posLabels=['🥇 1st','🥈 2nd','🥉 3rd','4th','5th','6th','7th','8th','9th','10th'];
+  document.getElementById('f1posDisp').textContent=posLabels[F1G.position-1]||F1G.position+'th';
+  var timeLeft=Math.ceil((1800-F1G.duration)/60);
+  document.getElementById('f1timeDisp').textContent=Math.max(0,timeLeft)+'s';
+  if(F1G.duration>=1800) endF1Race();
+}
+
+function f1Draw(ctx) {
+  ctx.fillStyle='#2a2a2a'; ctx.fillRect(0,0,F1_W,F1_H);
+  ctx.fillStyle='#1a4a1a'; ctx.fillRect(0,0,12,F1_H); ctx.fillRect(F1_W-12,0,12,F1_H);
+  ctx.strokeStyle='rgba(255,255,255,0.5)'; ctx.lineWidth=2; ctx.setLineDash([30,20]); ctx.lineDashOffset=-F1G.offset;
+  for(var l=1;l<3;l++){ var lx=l*(F1_W/3); ctx.beginPath(); ctx.moveTo(lx,0); ctx.lineTo(lx,F1_H); ctx.stroke(); }
+  ctx.setLineDash([]); ctx.lineDashOffset=0;
+  for(var i=0;i<F1G.aiCars.length;i++){
+    var c=F1G.aiCars[i];
+    f1DrawCar(ctx,F1_LANES[c.lane],c.y,c.team,false);
+  }
+  f1DrawCar(ctx,F1_LANES[F1G.lane],F1_PLAYER_Y,F1G.team,true);
+}
+
+function f1RoundRect(ctx,x,y,w,h,r){
+  ctx.beginPath(); ctx.moveTo(x+r,y);
+  ctx.lineTo(x+w-r,y); ctx.quadraticCurveTo(x+w,y,x+w,y+r);
+  ctx.lineTo(x+w,y+h-r); ctx.quadraticCurveTo(x+w,y+h,x+w-r,y+h);
+  ctx.lineTo(x+r,y+h); ctx.quadraticCurveTo(x,y+h,x,y+h-r);
+  ctx.lineTo(x,y+r); ctx.quadraticCurveTo(x,y,x+r,y);
+  ctx.closePath();
+}
+
+function f1DrawCar(ctx,cx,cy,team,isPlayer){
+  var w=F1_CW, h=F1_CH, x=cx-w/2, y=cy-h/2;
+  ctx.fillStyle=team.c; f1RoundRect(ctx,x,y,w,h,6); ctx.fill();
+  ctx.fillStyle=team.a; ctx.fillRect(x+7,y+h*0.32,w-14,h*0.14);
+  ctx.fillStyle='#111';
+  ctx.fillRect(x-7,y+8,8,16); ctx.fillRect(x+w-1,y+8,8,16);
+  ctx.fillRect(x-7,y+h-24,8,16); ctx.fillRect(x+w-1,y+h-24,8,16);
+  ctx.fillStyle=isPlayer?'rgba(120,210,255,0.65)':'rgba(160,230,255,0.35)';
+  f1RoundRect(ctx,x+8,y+10,w-16,16,4); ctx.fill();
+  if(isPlayer){ ctx.strokeStyle='#FFD700'; ctx.lineWidth=2.5; f1RoundRect(ctx,x-3,y-3,w+6,h+6,9); ctx.stroke(); }
+}
+
+function endF1Race(){
+  F1G.over=true;
+  cancelAnimationFrame(F1G.raf); F1G.raf=null;
+  var pos=F1G.position;
+  var coinMap=[200,150,100,80,65,50,40,30,20,10];
+  var earned=coinMap[pos-1]||10;
+  G.coins+=earned; saveCoins();
+  document.getElementById('coinDisplay').textContent=G.coins;
+  var posLabels=['1st','2nd','3rd','4th','5th','6th','7th','8th','9th','10th'];
+  var posEmojis=['🥇','🥈','🥉','🏁','🏁','🏁','🏁','🏁','🏁','🏁'];
+  document.getElementById('f1race').style.display='none';
+  document.getElementById('f1result').style.display='';
+  document.getElementById('f1resEmoji').textContent=posEmojis[pos-1];
+  document.getElementById('f1resPos').textContent=posLabels[pos-1]+' PLACE!';
+  document.getElementById('f1resTeam').textContent=F1G.team.name+' — #'+F1G.driver.num+' '+F1G.driver.name;
+  document.getElementById('f1resCoins').textContent='+'+earned+' 🪙';
+  document.getElementById('f1resTotal').textContent='Total: '+G.coins+' coins';
 }
 
 // ===== COUNTRY WHEEL =====
