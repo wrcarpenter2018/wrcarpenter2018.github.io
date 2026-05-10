@@ -416,6 +416,15 @@ body{font-family:Arial Black,Arial,sans-serif;background:#0a0a1a;color:#fff;min-
         <button onclick="document.getElementById('f1stepTeam').style.display='';document.getElementById('f1stepDriver').style.display='none'" style="background:rgba(255,255,255,.08);border:1px solid #444;border-radius:8px;padding:6px 16px;color:#aaa;font-family:inherit;font-size:11px;cursor:pointer">← Back to Teams</button>
       </div>
     </div>
+    <div style="text-align:center;margin-top:10px">
+      <button onclick="toggleF1Upgrades()" style="background:linear-gradient(135deg,#333,#555);border:none;border-radius:8px;padding:7px 20px;color:#fff;font-family:inherit;font-size:11px;font-weight:900;cursor:pointer;letter-spacing:1px;width:100%;max-width:260px">🔧 DRIVER UPGRADES</button>
+    </div>
+    <!-- Driver Upgrades Panel -->
+    <div id="f1upgradePanel" style="display:none;margin-top:10px;padding:0 8px">
+      <div style="font-size:9px;letter-spacing:2px;color:#e10600;text-transform:uppercase;text-align:center;margin-bottom:8px">DRIVER UPGRADES</div>
+      <div style="font-size:11px;color:#FFD700;font-weight:900;text-align:center;margin-bottom:8px">🪙 <span id="f1upgCoins">0</span> coins</div>
+      <div id="f1upgGrid" style="display:grid;grid-template-columns:1fr 1fr;gap:8px"></div>
+    </div>
     <div style="text-align:center;margin-top:10px;padding-bottom:14px">
       <button onclick="openVault()" style="background:rgba(255,255,255,.08);border:1px solid #444;border-radius:8px;padding:6px 20px;color:#aaa;font-family:inherit;font-size:11px;font-weight:900;cursor:pointer">← VAULT</button>
     </div>
@@ -1693,6 +1702,49 @@ var F1_TEAMS = [
   {name:'Racing Bulls',e:'🐮',c:'#4e7c99', a:'#cc1e00', drivers:[{name:'Tsunoda',num:22},{name:'Hadjar',num:6}]}
 ];
 
+var F1_UPGRADE_DEFS = [
+  {key:'engine', icon:'⚡', name:'Engine',    desc:'Higher top speed',          cost:200},
+  {key:'tires',  icon:'🔄', name:'Soft Tires',desc:'Less crash speed loss',     cost:150},
+  {key:'aero',   icon:'🌬️', name:'Aero Kit',  desc:'Gain positions faster',     cost:250},
+  {key:'drs',    icon:'🚀', name:'DRS',        desc:'Faster acceleration',       cost:300}
+];
+var F1_UPGRADES = {engine:0,tires:0,aero:0,drs:0};
+function saveF1Upgrades(){ try{localStorage.setItem('lfo_f1upg',JSON.stringify(F1_UPGRADES));}catch(e){} }
+function loadF1Upgrades(){ try{var v=JSON.parse(localStorage.getItem('lfo_f1upg'));if(v&&typeof v==='object'){['engine','tires','aero','drs'].forEach(function(k){F1_UPGRADES[k]=v[k]?1:0;});}}catch(e){} }
+
+function toggleF1Upgrades(){
+  var p=document.getElementById('f1upgradePanel');
+  p.style.display=p.style.display==='none'?'':'none';
+  if(p.style.display!=='none') renderF1Upgrades();
+}
+
+function renderF1Upgrades(){
+  document.getElementById('f1upgCoins').textContent=G.coins;
+  var g=document.getElementById('f1upgGrid'); g.innerHTML='';
+  F1_UPGRADE_DEFS.forEach(function(def){
+    var owned=F1_UPGRADES[def.key];
+    var canAfford=G.coins>=def.cost;
+    var card=document.createElement('div');
+    card.style.cssText='background:'+(owned?'rgba(225,6,0,0.15)':'rgba(255,255,255,0.05)')+';border:2px solid '+(owned?'#e10600':'rgba(255,255,255,0.1)')+';border-radius:10px;padding:10px 8px;text-align:center';
+    card.innerHTML='<div style="font-size:22px">'+def.icon+'</div>'
+      +'<div style="font-size:11px;font-weight:900;color:#fff;margin-top:4px;letter-spacing:1px">'+def.name.toUpperCase()+'</div>'
+      +'<div style="font-size:9px;color:#888;margin:3px 0 6px">'+def.desc+'</div>'
+      +(owned
+        ?'<div style="font-size:10px;font-weight:900;color:#e10600">✅ ACTIVE</div>'
+        :'<button onclick="buyF1Upgrade(\''+def.key+'\')" '+(canAfford?'':'disabled')
+          +' style="background:'+(canAfford?'linear-gradient(135deg,#e10600,#ff6b00)':'#333')+';border:none;border-radius:6px;padding:4px 10px;color:#fff;font-family:inherit;font-size:10px;font-weight:900;cursor:'+(canAfford?'pointer':'not-allowed')+';opacity:'+(canAfford?'1':'0.5')+'">'
+          +(canAfford?'UNLOCK '+def.cost+' 🪙':'NEED '+def.cost+' 🪙')+'</button>');
+    g.appendChild(card);
+  });
+}
+
+function buyF1Upgrade(key){
+  var def=null; for(var i=0;i<F1_UPGRADE_DEFS.length;i++) if(F1_UPGRADE_DEFS[i].key===key){def=F1_UPGRADE_DEFS[i];break;}
+  if(!def||F1_UPGRADES[key]||G.coins<def.cost) return;
+  G.coins-=def.cost; saveCoins(); F1_UPGRADES[key]=1; saveF1Upgrades();
+  renderF1Upgrades();
+}
+
 var F1G = { team:null, driver:null, lane:1, over:false, raf:null, duration:0, offset:0, speed:6, position:10, clearTicks:0, collideTick:0, aiCars:[], msgTimer:null };
 var F1_W=300, F1_H=480, F1_LANES=[50,150,250], F1_CW=44, F1_CH=68, F1_PLAYER_Y=390;
 
@@ -1771,6 +1823,10 @@ function f1Steer(dir) {
 function f1Update() {
   F1G.duration++;
   F1G.offset = (F1G.offset + F1G.speed) % 80;
+  var maxSpd = F1_UPGRADES.engine ? 14 : 11;
+  var collPen = F1_UPGRADES.tires ? 0.04 : 0.08;
+  var aeroInt = F1_UPGRADES.aero ? 75 : 110;
+  var drsAcc  = F1_UPGRADES.drs  ? 0.05 : 0.025;
   var collision = false;
   for(var i=0;i<F1G.aiCars.length;i++){
     var c=F1G.aiCars[i];
@@ -1780,25 +1836,29 @@ function f1Update() {
       var ct=c.y-F1_CH/2, cb=c.y+F1_CH/2;
       if(cb>pt&&ct<pb) collision=true;
     }
-    if(c.y>F1_H+60){ c.y=-80-Math.random()*100; c.lane=Math.floor(Math.random()*3); c.spd=2+Math.random()*2.5; }
+    // passing: car scrolled past player in a different lane = overtake
+    if(!c.passed && c.lane!==F1G.lane && c.y > F1_PLAYER_Y+F1_CH){
+      c.passed=true;
+      if(F1G.position>1){
+        F1G.position--;
+        var posLabels=['1st','2nd','3rd','4th','5th','6th','7th','8th','9th','10th'];
+        document.getElementById('f1msg').textContent='⬆️ OVERTAKE! '+posLabels[F1G.position-1]+'!';
+        if(F1G.msgTimer) clearTimeout(F1G.msgTimer);
+        F1G.msgTimer=setTimeout(function(){document.getElementById('f1msg').textContent='';},1400);
+      }
+    }
+    if(c.y>F1_H+60){ c.y=-80-Math.random()*100; c.lane=Math.floor(Math.random()*3); c.spd=2+Math.random()*2.5; c.passed=false; }
   }
   if(collision){
     F1G.clearTicks=0;
-    F1G.speed=Math.max(3,F1G.speed-0.08);
+    F1G.speed=Math.max(3,F1G.speed-collPen);
     F1G.collideTick++;
-    if(F1G.collideTick%80===0&&F1G.position<10) F1G.position=Math.min(10,F1G.position+1);
-    if(F1G.collideTick===1){ document.getElementById('f1msg').textContent='💥 COLLISION!'; }
+    if(F1G.collideTick%90===0&&F1G.position<10) F1G.position=Math.min(10,F1G.position+1);
+    if(F1G.collideTick===1){ document.getElementById('f1msg').textContent='💥 COLLISION!'; if(F1G.msgTimer) clearTimeout(F1G.msgTimer); F1G.msgTimer=setTimeout(function(){document.getElementById('f1msg').textContent='';},1200); }
   } else {
     F1G.collideTick=0;
     F1G.clearTicks++;
-    F1G.speed=Math.min(11,F1G.speed+0.025);
-    if(F1G.clearTicks>0&&F1G.clearTicks%110===0&&F1G.position>1){
-      F1G.position--;
-      var posLabels=['1st','2nd','3rd','4th','5th','6th','7th','8th','9th','10th'];
-      document.getElementById('f1msg').textContent='⬆️ UP TO '+posLabels[F1G.position-1]+'!';
-      if(F1G.msgTimer) clearTimeout(F1G.msgTimer);
-      F1G.msgTimer=setTimeout(function(){document.getElementById('f1msg').textContent='';},1500);
-    }
+    F1G.speed=Math.min(maxSpd,F1G.speed+drsAcc);
   }
   var posLabels=['🥇 1st','🥈 2nd','🥉 3rd','4th','5th','6th','7th','8th','9th','10th'];
   document.getElementById('f1posDisp').textContent=posLabels[F1G.position-1]||F1G.position+'th';
@@ -2291,6 +2351,7 @@ window.addEventListener('DOMContentLoaded', function(){
   loadSlams();
   loadTrophies();
   loadCountries();
+  loadF1Upgrades();
   G.playerSkin = SKINS[0];
   buildSkinGrid();
   buildRoundPicker();
