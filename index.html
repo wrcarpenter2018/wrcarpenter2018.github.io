@@ -1799,8 +1799,14 @@ function startF1Race(team, driver) {
   document.getElementById('f1result').style.display='none';
   document.getElementById('f1msg').textContent='';
   document.getElementById('f1driverDisp').textContent = '#'+driver.num+' '+driver.name;
+  // Place all 9 cars visible on screen at start, 3 per lane staggered
+  var startPositions = [
+    {lane:0,y:30},{lane:1,y:60},{lane:2,y:90},
+    {lane:0,y:160},{lane:1,y:190},{lane:2,y:220},
+    {lane:0,y:290},{lane:1,y:320},{lane:2,y:350}
+  ];
   for(var i=0;i<9;i++){
-    F1G.aiCars.push({lane:i%3, y:-80-i*130, team:F1_TEAMS[(i+1)%F1_TEAMS.length], spd:2+Math.random()*2.5, passed:false});
+    F1G.aiCars.push({lane:startPositions[i].lane, y:startPositions[i].y, team:F1_TEAMS[(i+1)%F1_TEAMS.length], spd:2+Math.random()*1.5, passed:false});
   }
   var canvas=document.getElementById('f1canvas');
   var ctx=canvas.getContext('2d');
@@ -1845,19 +1851,12 @@ function f1Update() {
         F1G.msgTimer=setTimeout(function(){document.getElementById('f1msg').textContent='';},1400);
       }
     }
-    if(c.y>F1_H+60){
-      var topY = -120;
-      // find a lane not occupied near the top
-      var tries=0, newLane=Math.floor(Math.random()*3);
-      while(tries<10){
-        var blocked=false;
-        for(var j=0;j<F1G.aiCars.length;j++){
-          if(j!==i && F1G.aiCars[j].lane===newLane && F1G.aiCars[j].y<0) blocked=true;
-        }
-        if(!blocked) break;
-        newLane=(newLane+1)%3; tries++;
-      }
-      c.y=topY - Math.random()*60; c.lane=newLane; c.spd=2+Math.random()*2.5; c.passed=false;
+    if(c.y>F1_H+40){
+      // find the highest (most negative) y of all cars to stay spaced
+      var minY = 0;
+      for(var j=0;j<F1G.aiCars.length;j++){ if(j!==i && F1G.aiCars[j].y < minY) minY=F1G.aiCars[j].y; }
+      c.y = Math.min(-90, minY - 80 - Math.random()*40);
+      c.lane = i%3; c.spd=2+Math.random()*1.5; c.passed=false;
     }
   }
   if(collision){
